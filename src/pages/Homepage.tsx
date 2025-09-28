@@ -142,10 +142,10 @@ export const Homepage: React.FC = () => {
         <div className="container mx-auto px-4 text-center">
           <div className="flex items-center justify-center space-x-2 mb-4">
             <Building2 className="h-6 w-6 text-primary" />
-            <span className="text-xl font-bold">HOARatings</span>
+            <span className="text-xl font-bold">HOA Community Forums</span>
           </div>
           <p className="text-sm text-muted-foreground">
-            &copy; 2024 HOARatings. Building stronger communities through better communication.
+            &copy; 2024 HOA Community Forums. Building stronger communities through better communication.
           </p>
         </div>
       </footer>
