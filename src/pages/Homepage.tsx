@@ -51,73 +51,60 @@ export const Homepage: React.FC = () => {
       <Header />
       
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-primary/5 via-background to-secondary/5 py-20">
+      <section className="relative bg-gradient-to-br from-primary/5 via-background to-secondary/5 py-16">
         <div className="container mx-auto px-4 text-center">
-          <h1 className="text-4xl md:text-6xl font-bold mb-6">
+          <h1 className="text-3xl md:text-5xl font-bold mb-4">
             Find Your Perfect{' '}
             <span className="text-primary">HOA Community</span>
           </h1>
-          <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Discover, review, and connect with Homeowners Associations. 
-            Make informed decisions about your next home with real resident reviews.
+          <p className="text-lg text-muted-foreground mb-6 max-w-xl mx-auto">
+            Read real reviews from residents and make informed decisions about your next home.
           </p>
           
-          <form onSubmit={handleSearch} className="flex max-w-lg mx-auto mb-8">
+          <form onSubmit={handleSearch} className="flex max-w-md mx-auto mb-6">
             <Input
               type="text"
-              placeholder="Search by HOA name, city, or state..."
+              placeholder="Search communities..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="flex-1 rounded-r-none"
             />
-            <Button type="submit" className="rounded-l-none">
+            <Button type="submit" className="rounded-l-none px-4">
               <Search className="h-4 w-4" />
             </Button>
           </form>
           
-          <div className="flex flex-wrap justify-center gap-4">
-            <Link to="/search">
-              <Button variant="outline">Browse All HOAs</Button>
-            </Link>
-          </div>
+          <Link to="/search">
+            <Button variant="outline" size="sm">Browse All Communities</Button>
+          </Link>
         </div>
       </section>
 
       {/* Features Section */}
-      <section className="py-20 bg-muted/30">
+      <section className="py-12 bg-muted/30">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12">
-            Why Choose HOAdoor?
-          </h2>
-          
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Star className="h-8 w-8 text-primary" />
-              </div>
-              <h3 className="text-xl font-semibold mb-3">Real Reviews</h3>
-              <p className="text-muted-foreground">
-                Read authentic reviews from actual HOA members about their living experience
+          <div className="grid md:grid-cols-3 gap-6 text-center">
+            <div>
+              <Star className="h-8 w-8 text-primary mx-auto mb-3" />
+              <h3 className="font-semibold mb-2">Real Reviews</h3>
+              <p className="text-sm text-muted-foreground">
+                Authentic reviews from actual residents
               </p>
             </div>
             
-            <div className="text-center">
-              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Users className="h-8 w-8 text-primary" />
-              </div>
-              <h3 className="text-xl font-semibold mb-3">Community Insights</h3>
-              <p className="text-muted-foreground">
-                Access private community discussions and stay informed about your HOA
+            <div>
+              <Users className="h-8 w-8 text-primary mx-auto mb-3" />
+              <h3 className="font-semibold mb-2">Community Access</h3>
+              <p className="text-sm text-muted-foreground">
+                Join private forums and discussions
               </p>
             </div>
             
-            <div className="text-center">
-              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Shield className="h-8 w-8 text-primary" />
-              </div>
-              <h3 className="text-xl font-semibold mb-3">Transparent Information</h3>
-              <p className="text-muted-foreground">
-                Get detailed information about amenities, rules, and community standards
+            <div>
+              <Shield className="h-8 w-8 text-primary mx-auto mb-3" />
+              <h3 className="font-semibold mb-2">Transparent Info</h3>
+              <p className="text-sm text-muted-foreground">
+                Complete details about amenities and rules
               </p>
             </div>
           </div>
@@ -125,23 +112,23 @@ export const Homepage: React.FC = () => {
       </section>
 
       {/* Featured HOAs */}
-      <section className="py-20">
+      <section className="py-12">
         <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between mb-12">
-            <h2 className="text-3xl font-bold">Featured Communities</h2>
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="text-2xl font-bold">Featured Communities</h2>
             <Link to="/search">
-              <Button variant="outline">View All</Button>
+              <Button variant="outline" size="sm">View All</Button>
             </Link>
           </div>
           
           {loading ? (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
               {[...Array(6)].map((_, i) => (
-                <div key={i} className="h-64 bg-muted animate-pulse rounded-lg" />
+                <div key={i} className="h-48 bg-muted animate-pulse rounded-lg" />
               ))}
             </div>
           ) : (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
               {featuredHOAs.map((hoa) => (
                 <HOACard key={hoa.id} hoa={hoa} />
               ))}
@@ -151,16 +138,15 @@ export const Homepage: React.FC = () => {
       </section>
 
       {/* Footer */}
-      <footer className="bg-muted py-12">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-center space-x-2 mb-8">
-            <Building2 className="h-8 w-8 text-primary" />
-            <span className="text-2xl font-bold">HOAdoor</span>
+      <footer className="bg-muted py-8">
+        <div className="container mx-auto px-4 text-center">
+          <div className="flex items-center justify-center space-x-2 mb-4">
+            <Building2 className="h-6 w-6 text-primary" />
+            <span className="text-xl font-bold">HOAdoor</span>
           </div>
-          
-          <div className="text-center text-muted-foreground">
-            <p>&copy; 2024 HOAdoor. Connecting communities, one review at a time.</p>
-          </div>
+          <p className="text-sm text-muted-foreground">
+            &copy; 2024 HOAdoor. Connecting communities, one review at a time.
+          </p>
         </div>
       </footer>
     </div>
