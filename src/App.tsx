@@ -7,6 +7,8 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { Homepage } from "./pages/Homepage";
 import { SearchPage } from "./pages/SearchPage";
 import { HOAProfile } from "./pages/HOAProfile";
+import { CommunityPortal } from "./pages/CommunityPortal";
+import { AdminDashboard } from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -22,6 +24,8 @@ const App = () => (
             <Route path="/" element={<Homepage />} />
             <Route path="/search" element={<SearchPage />} />
             <Route path="/hoa/:slug" element={<HOAProfile />} />
+            <Route path="/community/:slug" element={<CommunityPortal />} />
+            <Route path="/admin" element={<AdminDashboard />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

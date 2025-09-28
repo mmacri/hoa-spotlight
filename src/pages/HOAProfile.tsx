@@ -3,6 +3,8 @@ import { useParams } from 'react-router-dom';
 import { Header } from '@/components/layout/Header';
 import { ReviewCard, Review, AdminResponse } from '@/components/reviews/ReviewCard';
 import { ReviewForm } from '@/components/reviews/ReviewForm';
+import { MembershipRequest } from '@/components/membership/MembershipRequest';
+import { FlagContent } from '@/components/reporting/FlagContent';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -329,6 +331,12 @@ export const HOAProfile: React.FC = () => {
                           key={review.id}
                           review={review}
                           adminResponse={adminResponse}
+                          flagButton={
+                            <FlagContent 
+                              targetType="REVIEW" 
+                              targetId={review.id} 
+                            />
+                          }
                         />
                       );
                     })}
@@ -407,9 +415,12 @@ export const HOAProfile: React.FC = () => {
                           Write a Review
                         </Button>
                       )}
-                      <Button variant="outline" className="w-full">
-                        Request Membership
-                      </Button>
+                      <div className="w-full">
+                        <MembershipRequest
+                          hoaId={hoa.id}
+                          hoaName={hoa.name}
+                        />
+                      </div>
                     </>
                   ) : (
                     <div className="text-center p-4 bg-muted rounded-lg">

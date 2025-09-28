@@ -31,14 +31,16 @@ interface ReviewCardProps {
   showAdminResponse?: boolean;
   onReply?: (reviewId: string) => void;
   canReply?: boolean;
+  flagButton?: React.ReactNode;
 }
 
 export const ReviewCard: React.FC<ReviewCardProps> = ({ 
   review, 
   adminResponse, 
-  showAdminResponse = true,
-  onReply,
-  canReply = false 
+  showAdminResponse = true, 
+  onReply, 
+  canReply = false,
+  flagButton
 }) => {
   const renderStars = (rating: number) => {
     return Array.from({ length: 5 }, (_, i) => (
@@ -79,11 +81,14 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
             </div>
           </div>
           
-          {review.status !== 'APPROVED' && (
-            <Badge variant={review.status === 'PENDING' ? 'outline' : 'destructive'}>
-              {review.status}
-            </Badge>
-          )}
+          <div className="flex items-center space-x-2">
+            {flagButton}
+            {review.status !== 'APPROVED' && (
+              <Badge variant={review.status === 'PENDING' ? 'outline' : 'destructive'}>
+                {review.status}
+              </Badge>
+            )}
+          </div>
         </div>
       </CardHeader>
       
