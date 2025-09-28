@@ -50,7 +50,15 @@ export const SearchPage: React.FC = () => {
     setLoading(true);
     
     try {
-      let query = supabase.from('hoas').select('*');
+      let query = supabase
+        .from('hoas')
+        .select(`
+          *,
+          rating_aggregates (
+            average_rating,
+            total_reviews
+          )
+        `);
 
       // Text search
       if (searchQuery.trim()) {
@@ -67,11 +75,23 @@ export const SearchPage: React.FC = () => {
         query = query.overlaps('amenities', selectedAmenities);
       }
 
+      // Rating filter
+      if (minRating) {
+        query = query.gte('rating_aggregates.average_rating', parseFloat(minRating));
+      }
+
       const { data, error } = await query;
 
       if (error) throw error;
 
-      setHoas(data || []);
+      // Flatten the rating data
+      const hoasWithRatings = (data || []).map(hoa => ({
+        ...hoa,
+        average_rating: hoa.rating_aggregates?.[0]?.average_rating || null,
+        total_reviews: hoa.rating_aggregates?.[0]?.total_reviews || 0
+      }));
+
+      setHoas(hoasWithRatings);
     } catch (error: any) {
       toast({
         title: "Search failed",

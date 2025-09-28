@@ -13,7 +13,8 @@ import {
   UserPlus,
   UserMinus,
   Building2,
-  MessageSquare
+  MessageSquare,
+  Calendar
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -33,11 +34,20 @@ interface AuditLog {
   };
 }
 
+interface HOA {
+  id: string;
+  name: string;
+}
+
 export const AuditLogViewer: React.FC = () => {
   const [logs, setLogs] = useState<AuditLog[]>([]);
+  const [hoas, setHoas] = useState<HOA[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [actionFilter, setActionFilter] = useState('all');
+  const [communityFilter, setCommunityFilter] = useState('all');
+  const [dateFromFilter, setDateFromFilter] = useState('');
+  const [dateToFilter, setDateToFilter] = useState('');
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const { toast } = useToast();
@@ -45,8 +55,23 @@ export const AuditLogViewer: React.FC = () => {
   const LOGS_PER_PAGE = 50;
 
   useEffect(() => {
+    fetchHOAs();
     fetchAuditLogs(1);
-  }, [actionFilter]);
+  }, [actionFilter, communityFilter, dateFromFilter, dateToFilter]);
+
+  const fetchHOAs = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('hoas')
+        .select('id, name')
+        .order('name');
+      
+      if (error) throw error;
+      setHoas(data || []);
+    } catch (error) {
+      console.error('Error fetching HOAs:', error);
+    }
+  };
 
   const fetchAuditLogs = async (pageNum: number) => {
     if (pageNum === 1) setLoading(true);
@@ -68,6 +93,22 @@ export const AuditLogViewer: React.FC = () => {
 
       if (actionFilter !== 'all') {
         query = query.ilike('action', `%${actionFilter}%`);
+      }
+
+      // Community filter
+      if (communityFilter !== 'all') {
+        // Filter by HOA ID in metadata for HOA-related actions
+        query = query.or(`metadata->>hoa_id.eq.${communityFilter},metadata->>hoa_name.ilike.%${hoas.find(h => h.id === communityFilter)?.name}%`);
+      }
+
+      // Date filters
+      if (dateFromFilter) {
+        query = query.gte('created_at', new Date(dateFromFilter).toISOString());
+      }
+      if (dateToFilter) {
+        const toDate = new Date(dateToFilter);
+        toDate.setHours(23, 59, 59, 999);
+        query = query.lte('created_at', toDate.toISOString());
       }
 
       const { data, error } = await query;
@@ -164,7 +205,7 @@ export const AuditLogViewer: React.FC = () => {
         </div>
       </div>
 
-      <div className="flex flex-col md:flex-row gap-4">
+      <div className="flex flex-col gap-4">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
           <Input
@@ -174,22 +215,58 @@ export const AuditLogViewer: React.FC = () => {
             className="pl-10"
           />
         </div>
-        <div className="flex items-center space-x-2">
-          <Filter className="h-4 w-4 text-muted-foreground" />
-          <Select value={actionFilter} onValueChange={setActionFilter}>
-            <SelectTrigger className="w-48">
-              <SelectValue placeholder="Filter by action" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Actions</SelectItem>
-              <SelectItem value="DELETE">Deletions</SelectItem>
-              <SelectItem value="APPROVED">Approvals</SelectItem>
-              <SelectItem value="REJECTED">Rejections</SelectItem>
-              <SelectItem value="CREATED">Creations</SelectItem>
-              <SelectItem value="HOA">HOA Actions</SelectItem>
-              <SelectItem value="ROLE">Role Changes</SelectItem>
-            </SelectContent>
-          </Select>
+        
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="flex items-center space-x-2">
+            <Filter className="h-4 w-4 text-muted-foreground" />
+            <Select value={actionFilter} onValueChange={setActionFilter}>
+              <SelectTrigger className="w-48">
+                <SelectValue placeholder="Filter by action" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Actions</SelectItem>
+                <SelectItem value="DELETE">Deletions</SelectItem>
+                <SelectItem value="APPROVED">Approvals</SelectItem>
+                <SelectItem value="REJECTED">Rejections</SelectItem>
+                <SelectItem value="CREATED">Creations</SelectItem>
+                <SelectItem value="HOA">HOA Actions</SelectItem>
+                <SelectItem value="ROLE">Role Changes</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <Building2 className="h-4 w-4 text-muted-foreground" />
+            <Select value={communityFilter} onValueChange={setCommunityFilter}>
+              <SelectTrigger className="w-48">
+                <SelectValue placeholder="Filter by community" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Communities</SelectItem>
+                {hoas.map(hoa => (
+                  <SelectItem key={hoa.id} value={hoa.id}>{hoa.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <Calendar className="h-4 w-4 text-muted-foreground" />
+            <Input
+              type="date"
+              placeholder="From date"
+              value={dateFromFilter}
+              onChange={(e) => setDateFromFilter(e.target.value)}
+              className="w-40"
+            />
+            <Input
+              type="date"
+              placeholder="To date"
+              value={dateToFilter}
+              onChange={(e) => setDateToFilter(e.target.value)}
+              className="w-40"
+            />
+          </div>
         </div>
       </div>
 
