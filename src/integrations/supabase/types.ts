@@ -831,6 +831,51 @@ export type Database = {
           },
         ]
       }
+      role_promotion_requests: {
+        Row: {
+          created_at: string
+          current_membership_role: Database["public"]["Enums"]["membership_role"]
+          hoa_id: string
+          id: string
+          justification: string | null
+          requested_role: Database["public"]["Enums"]["membership_role"]
+          requester_user_id: string
+          review_notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: Database["public"]["Enums"]["content_status"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          current_membership_role?: Database["public"]["Enums"]["membership_role"]
+          hoa_id: string
+          id?: string
+          justification?: string | null
+          requested_role: Database["public"]["Enums"]["membership_role"]
+          requester_user_id: string
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["content_status"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          current_membership_role?: Database["public"]["Enums"]["membership_role"]
+          hoa_id?: string
+          id?: string
+          justification?: string | null
+          requested_role?: Database["public"]["Enums"]["membership_role"]
+          requester_user_id?: string
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["content_status"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       rating_aggregates: {
@@ -859,6 +904,10 @@ export type Database = {
     Functions: {
       approve_comments: {
         Args: { comment_ids: string[] }
+        Returns: undefined
+      }
+      approve_role_promotion: {
+        Args: { admin_user_id: string; request_id: string }
         Returns: undefined
       }
       check_admin_status: {
