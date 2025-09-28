@@ -15,8 +15,10 @@ import {
   XCircle,
   Clock
 } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { DeletionManagement } from '@/components/admin/DeletionManagement';
+import { RolePromotionRequests } from '@/components/admin/RolePromotionRequests';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 interface UserProfile {
   id: string;

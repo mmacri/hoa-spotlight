@@ -5,6 +5,8 @@ import { HOACreationRequests } from '@/components/admin/HOACreationRequests';
 import { RolePromotionRequests } from '@/components/admin/RolePromotionRequests';
 import { UserManagement } from '@/components/admin/UserManagement';
 import { BulkHOAUpload } from '@/components/admin/BulkHOAUpload';
+import { DeletionManagement } from '@/components/admin/DeletionManagement';
+import { AuditLogViewer } from '@/components/admin/AuditLogViewer';
 import { useAuth } from '@/contexts/AuthContext';
 import { Navigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
@@ -92,7 +94,7 @@ export const AdminDashboard: React.FC = () => {
         </div>
 
         <Tabs defaultValue="moderation" className="w-full">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-7">
             <TabsTrigger value="moderation" className="flex items-center gap-2">
               <Shield className="h-4 w-4" />
               Moderation
@@ -112,6 +114,14 @@ export const AdminDashboard: React.FC = () => {
             <TabsTrigger value="users" className="flex items-center gap-2">
               <Users className="h-4 w-4" />
               User Management
+            </TabsTrigger>
+            <TabsTrigger value="deletion" className="flex items-center gap-2">
+              <Shield className="h-4 w-4" />
+              Deletion Management
+            </TabsTrigger>
+            <TabsTrigger value="audit" className="flex items-center gap-2">
+              <Shield className="h-4 w-4" />
+              Audit Logs
             </TabsTrigger>
           </TabsList>
 
@@ -133,6 +143,14 @@ export const AdminDashboard: React.FC = () => {
 
           <TabsContent value="users" className="mt-6">
             <UserManagement />
+          </TabsContent>
+
+          <TabsContent value="deletion" className="mt-6">
+            <DeletionManagement />
+          </TabsContent>
+
+          <TabsContent value="audit" className="mt-6">
+            <AuditLogViewer />
           </TabsContent>
         </Tabs>
       </div>
