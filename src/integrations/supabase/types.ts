@@ -14,6 +14,71 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_responses: {
+        Row: {
+          content: string
+          created_at: string | null
+          id: string
+          responder_user_id: string | null
+          review_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          id?: string
+          responder_user_id?: string | null
+          review_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          id?: string
+          responder_user_id?: string | null
+          review_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_responses_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      audit_logs: {
+        Row: {
+          action: string
+          actor_user_id: string | null
+          created_at: string | null
+          id: string
+          metadata: Json | null
+          target_id: string | null
+          target_type: string | null
+        }
+        Insert: {
+          action: string
+          actor_user_id?: string | null
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          target_id?: string | null
+          target_type?: string | null
+        }
+        Update: {
+          action?: string
+          actor_user_id?: string | null
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          target_id?: string | null
+          target_type?: string | null
+        }
+        Relationships: []
+      }
       blog_comments: {
         Row: {
           approved: boolean | null
@@ -82,6 +147,44 @@ export type Database = {
         }
         Relationships: []
       }
+      comments: {
+        Row: {
+          author_user_id: string | null
+          content: string
+          created_at: string | null
+          id: string
+          post_id: string | null
+          status: Database["public"]["Enums"]["content_status"] | null
+          updated_at: string | null
+        }
+        Insert: {
+          author_user_id?: string | null
+          content: string
+          created_at?: string | null
+          id?: string
+          post_id?: string | null
+          status?: Database["public"]["Enums"]["content_status"] | null
+          updated_at?: string | null
+        }
+        Update: {
+          author_user_id?: string | null
+          content?: string
+          created_at?: string | null
+          id?: string
+          post_id?: string | null
+          status?: Database["public"]["Enums"]["content_status"] | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comments_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contact_messages: {
         Row: {
           created_at: string | null
@@ -111,6 +214,243 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      documents: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          file_size: number | null
+          file_type: string | null
+          file_url: string
+          hoa_id: string | null
+          id: string
+          title: string
+          updated_at: string | null
+          uploaded_by: string | null
+          visibility: Database["public"]["Enums"]["visibility_type"] | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          file_size?: number | null
+          file_type?: string | null
+          file_url: string
+          hoa_id?: string | null
+          id?: string
+          title: string
+          updated_at?: string | null
+          uploaded_by?: string | null
+          visibility?: Database["public"]["Enums"]["visibility_type"] | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          file_size?: number | null
+          file_type?: string | null
+          file_url?: string
+          hoa_id?: string | null
+          id?: string
+          title?: string
+          updated_at?: string | null
+          uploaded_by?: string | null
+          visibility?: Database["public"]["Enums"]["visibility_type"] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "documents_hoa_id_fkey"
+            columns: ["hoa_id"]
+            isOneToOne: false
+            referencedRelation: "hoas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      events: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          ends_at: string | null
+          hoa_id: string | null
+          id: string
+          location: string | null
+          starts_at: string
+          title: string
+          updated_at: string | null
+          visibility: Database["public"]["Enums"]["visibility_type"] | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          ends_at?: string | null
+          hoa_id?: string | null
+          id?: string
+          location?: string | null
+          starts_at: string
+          title: string
+          updated_at?: string | null
+          visibility?: Database["public"]["Enums"]["visibility_type"] | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          ends_at?: string | null
+          hoa_id?: string | null
+          id?: string
+          location?: string | null
+          starts_at?: string
+          title?: string
+          updated_at?: string | null
+          visibility?: Database["public"]["Enums"]["visibility_type"] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "events_hoa_id_fkey"
+            columns: ["hoa_id"]
+            isOneToOne: false
+            referencedRelation: "hoas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      flags: {
+        Row: {
+          created_at: string | null
+          id: string
+          reason: string
+          reporter_user_id: string | null
+          resolution_notes: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          status: Database["public"]["Enums"]["flag_status"] | null
+          target_id: string
+          target_type: Database["public"]["Enums"]["flag_target"]
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          reason: string
+          reporter_user_id?: string | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: Database["public"]["Enums"]["flag_status"] | null
+          target_id: string
+          target_type: Database["public"]["Enums"]["flag_target"]
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          reason?: string
+          reporter_user_id?: string | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: Database["public"]["Enums"]["flag_status"] | null
+          target_id?: string
+          target_type?: Database["public"]["Enums"]["flag_target"]
+        }
+        Relationships: []
+      }
+      hoas: {
+        Row: {
+          amenities: string[] | null
+          city: string | null
+          created_at: string | null
+          description_private: string | null
+          description_public: string | null
+          id: string
+          name: string
+          search_vector: unknown | null
+          slug: string
+          state: string | null
+          unit_count: number | null
+          updated_at: string | null
+          zip_code: string | null
+        }
+        Insert: {
+          amenities?: string[] | null
+          city?: string | null
+          created_at?: string | null
+          description_private?: string | null
+          description_public?: string | null
+          id?: string
+          name: string
+          search_vector?: unknown | null
+          slug: string
+          state?: string | null
+          unit_count?: number | null
+          updated_at?: string | null
+          zip_code?: string | null
+        }
+        Update: {
+          amenities?: string[] | null
+          city?: string | null
+          created_at?: string | null
+          description_private?: string | null
+          description_public?: string | null
+          id?: string
+          name?: string
+          search_vector?: unknown | null
+          slug?: string
+          state?: string | null
+          unit_count?: number | null
+          updated_at?: string | null
+          zip_code?: string | null
+        }
+        Relationships: []
+      }
+      memberships: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          created_at: string | null
+          hoa_id: string | null
+          id: string
+          notes: string | null
+          requested_at: string | null
+          role: Database["public"]["Enums"]["membership_role"]
+          status: Database["public"]["Enums"]["membership_status"]
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string | null
+          hoa_id?: string | null
+          id?: string
+          notes?: string | null
+          requested_at?: string | null
+          role?: Database["public"]["Enums"]["membership_role"]
+          status?: Database["public"]["Enums"]["membership_status"]
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string | null
+          hoa_id?: string | null
+          id?: string
+          notes?: string | null
+          requested_at?: string | null
+          role?: Database["public"]["Enums"]["membership_role"]
+          status?: Database["public"]["Enums"]["membership_status"]
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "memberships_hoa_id_fkey"
+            columns: ["hoa_id"]
+            isOneToOne: false
+            referencedRelation: "hoas"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       portfolio_projects: {
         Row: {
@@ -147,6 +487,56 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      posts: {
+        Row: {
+          author_user_id: string | null
+          content: string
+          created_at: string | null
+          hoa_id: string | null
+          id: string
+          is_pinned: boolean | null
+          search_vector: unknown | null
+          status: Database["public"]["Enums"]["content_status"] | null
+          title: string
+          updated_at: string | null
+          visibility: Database["public"]["Enums"]["visibility_type"] | null
+        }
+        Insert: {
+          author_user_id?: string | null
+          content: string
+          created_at?: string | null
+          hoa_id?: string | null
+          id?: string
+          is_pinned?: boolean | null
+          search_vector?: unknown | null
+          status?: Database["public"]["Enums"]["content_status"] | null
+          title: string
+          updated_at?: string | null
+          visibility?: Database["public"]["Enums"]["visibility_type"] | null
+        }
+        Update: {
+          author_user_id?: string | null
+          content?: string
+          created_at?: string | null
+          hoa_id?: string | null
+          id?: string
+          is_pinned?: boolean | null
+          search_vector?: unknown | null
+          status?: Database["public"]["Enums"]["content_status"] | null
+          title?: string
+          updated_at?: string | null
+          visibility?: Database["public"]["Enums"]["visibility_type"] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "posts_hoa_id_fkey"
+            columns: ["hoa_id"]
+            isOneToOne: false
+            referencedRelation: "hoas"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -256,9 +646,86 @@ export type Database = {
         }
         Relationships: []
       }
+      reviews: {
+        Row: {
+          content: string | null
+          created_at: string | null
+          hoa_id: string | null
+          id: string
+          is_anonymous: boolean | null
+          moderated_at: string | null
+          moderated_by: string | null
+          moderation_reason: string | null
+          stars: number
+          status: Database["public"]["Enums"]["content_status"] | null
+          title: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string | null
+          hoa_id?: string | null
+          id?: string
+          is_anonymous?: boolean | null
+          moderated_at?: string | null
+          moderated_by?: string | null
+          moderation_reason?: string | null
+          stars: number
+          status?: Database["public"]["Enums"]["content_status"] | null
+          title?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          content?: string | null
+          created_at?: string | null
+          hoa_id?: string | null
+          id?: string
+          is_anonymous?: boolean | null
+          moderated_at?: string | null
+          moderated_by?: string | null
+          moderation_reason?: string | null
+          stars?: number
+          status?: Database["public"]["Enums"]["content_status"] | null
+          title?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_hoa_id_fkey"
+            columns: ["hoa_id"]
+            isOneToOne: false
+            referencedRelation: "hoas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
-      [_ in never]: never
+      rating_aggregates: {
+        Row: {
+          average_rating: number | null
+          hoa_id: string | null
+          last_review_at: string | null
+          stars_1_count: number | null
+          stars_2_count: number | null
+          stars_3_count: number | null
+          stars_4_count: number | null
+          stars_5_count: number | null
+          total_reviews: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_hoa_id_fkey"
+            columns: ["hoa_id"]
+            isOneToOne: false
+            referencedRelation: "hoas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       approve_comments: {
@@ -276,8 +743,16 @@ export type Database = {
           total_posts: number
         }[]
       }
+      is_hoa_admin: {
+        Args: { hoa_id: string; user_id: string }
+        Returns: boolean
+      }
       promote_user: {
         Args: { user_id: string }
+        Returns: undefined
+      }
+      refresh_rating_aggregates: {
+        Args: Record<PropertyKey, never>
         Returns: undefined
       }
       sync_missing_profiles: {
@@ -295,7 +770,12 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      content_status: "PENDING" | "APPROVED" | "REJECTED"
+      flag_status: "PENDING" | "RESOLVED" | "DISMISSED"
+      flag_target: "REVIEW" | "POST" | "COMMENT"
+      membership_role: "MEMBER" | "ADMIN" | "PRESIDENT"
+      membership_status: "PENDING" | "APPROVED" | "REJECTED"
+      visibility_type: "PRIVATE" | "PUBLIC"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -422,6 +902,13 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      content_status: ["PENDING", "APPROVED", "REJECTED"],
+      flag_status: ["PENDING", "RESOLVED", "DISMISSED"],
+      flag_target: ["REVIEW", "POST", "COMMENT"],
+      membership_role: ["MEMBER", "ADMIN", "PRESIDENT"],
+      membership_status: ["PENDING", "APPROVED", "REJECTED"],
+      visibility_type: ["PRIVATE", "PUBLIC"],
+    },
   },
 } as const
