@@ -918,6 +918,10 @@ export type Database = {
         Args: { admin_user_id: string; request_id: string }
         Returns: string
       }
+      delete_hoa_cascade: {
+        Args: { admin_user_id: string; hoa_id_param: string }
+        Returns: undefined
+      }
       generate_hoa_slug: {
         Args: { hoa_name: string }
         Returns: string
