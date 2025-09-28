@@ -41,7 +41,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Welcome to HOAdoor</DialogTitle>
+          <DialogTitle>Welcome to HOA Community Forums</DialogTitle>
         </DialogHeader>
         
         <Tabs defaultValue="signin" className="w-full">
