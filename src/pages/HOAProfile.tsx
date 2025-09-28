@@ -5,6 +5,7 @@ import { ReviewCard, Review, AdminResponse } from '@/components/reviews/ReviewCa
 import { ReviewForm } from '@/components/reviews/ReviewForm';
 import { MembershipRequest } from '@/components/membership/MembershipRequest';
 import { FlagContent } from '@/components/reporting/FlagContent';
+import { CommunityModerationDashboard } from '@/components/community/CommunityModerationDashboard';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -19,7 +20,10 @@ import {
   Users, 
   Building2, 
   MessageSquare,
-  Plus
+  Plus,
+  Shield,
+  TrendingUp,
+  TrendingDown
 } from 'lucide-react';
 
 interface HOADetails {
@@ -56,6 +60,9 @@ export const HOAProfile: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [userHasReviewed, setUserHasReviewed] = useState(false);
+  const [isHOAAdmin, setIsHOAAdmin] = useState(false);
+  const [highestRatedReview, setHighestRatedReview] = useState<Review | null>(null);
+  const [lowestRatedReview, setLowestRatedReview] = useState<Review | null>(null);
 
   useEffect(() => {
     if (slug) {
@@ -113,6 +120,13 @@ export const HOAProfile: React.FC = () => {
       if (reviewsError) throw reviewsError;
       setReviews(reviewsData || []);
 
+      // Find highest and lowest rated reviews
+      if (reviewsData && reviewsData.length > 0) {
+        const sortedByRating = [...reviewsData].sort((a, b) => b.stars - a.stars);
+        setHighestRatedReview(sortedByRating[0]);
+        setLowestRatedReview(sortedByRating[sortedByRating.length - 1]);
+      }
+
       // Fetch admin responses
       const reviewIds = reviewsData?.map(r => r.id) || [];
       if (reviewIds.length > 0) {
@@ -137,6 +151,20 @@ export const HOAProfile: React.FC = () => {
         if (!userReviewError && userReview) {
           setUserHasReviewed(true);
         }
+
+        // Check if user is HOA admin or president
+        const { data: membership } = await supabase
+          .from('memberships')
+          .select('role, status')
+          .eq('hoa_id', hoaData.id)
+          .eq('user_id', user.id)
+          .eq('status', 'APPROVED')
+          .in('role', ['ADMIN', 'PRESIDENT'])
+          .maybeSingle();
+
+        if (membership) {
+          setIsHOAAdmin(true);
+        }
       }
 
     } catch (error: any) {
@@ -154,6 +182,51 @@ export const HOAProfile: React.FC = () => {
     setShowReviewForm(false);
     setUserHasReviewed(true);
     fetchHOAData(); // Refresh data
+  };
+
+  const renderHighlightedReviews = () => {
+    if (!highestRatedReview && !lowestRatedReview) return null;
+
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Review Highlights</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {highestRatedReview && highestRatedReview.stars === 5 && (
+            <div className="p-4 bg-green-50 rounded-lg border border-green-200">
+              <div className="flex items-center gap-2 mb-2">
+                <TrendingUp className="h-5 w-5 text-green-600" />
+                <span className="font-medium text-green-800">Highest Rated Review</span>
+                <Badge variant="outline" className="bg-green-100">
+                  {Array.from({ length: highestRatedReview.stars }, (_, i) => '★').join('')}
+                </Badge>
+              </div>
+              <p className="text-sm text-green-700">
+                {highestRatedReview.content?.substring(0, 150)}
+                {highestRatedReview.content && highestRatedReview.content.length > 150 && '...'}
+              </p>
+            </div>
+          )}
+          
+          {lowestRatedReview && lowestRatedReview.stars <= 2 && highestRatedReview?.id !== lowestRatedReview.id && (
+            <div className="p-4 bg-red-50 rounded-lg border border-red-200">
+              <div className="flex items-center gap-2 mb-2">
+                <TrendingDown className="h-5 w-5 text-red-600" />
+                <span className="font-medium text-red-800">Lowest Rated Review</span>
+                <Badge variant="outline" className="bg-red-100">
+                  {Array.from({ length: lowestRatedReview.stars }, (_, i) => '★').join('')}
+                </Badge>
+              </div>
+              <p className="text-sm text-red-700">
+                {lowestRatedReview.content?.substring(0, 150)}
+                {lowestRatedReview.content && lowestRatedReview.content.length > 150 && '...'}
+              </p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    );
   };
 
   const renderRatingBreakdown = () => {
@@ -297,6 +370,12 @@ export const HOAProfile: React.FC = () => {
                   Reviews ({ratings?.total_reviews || 0})
                 </TabsTrigger>
                 <TabsTrigger value="overview">Overview</TabsTrigger>
+                {isHOAAdmin && (
+                  <TabsTrigger value="manage">
+                    <Shield className="h-4 w-4 mr-2" />
+                    Manage Community
+                  </TabsTrigger>
+                )}
               </TabsList>
               
               <TabsContent value="reviews" className="mt-6">
@@ -392,12 +471,22 @@ export const HOAProfile: React.FC = () => {
                   </CardContent>
                 </Card>
               </TabsContent>
+              
+              {isHOAAdmin && (
+                <TabsContent value="manage" className="mt-6">
+                  <CommunityModerationDashboard 
+                    hoaId={hoa.id} 
+                    hoaName={hoa.name}
+                  />
+                </TabsContent>
+              )}
             </Tabs>
           </div>
 
           {/* Sidebar */}
           <div className="space-y-6">
             {renderRatingBreakdown()}
+            {renderHighlightedReviews()}
             
             <Card>
               <CardHeader>

@@ -185,6 +185,39 @@ export type Database = {
           },
         ]
       }
+      community_audit_logs: {
+        Row: {
+          action: string
+          actor_user_id: string
+          created_at: string
+          details: Json | null
+          hoa_id: string
+          id: string
+          target_id: string | null
+          target_type: string
+        }
+        Insert: {
+          action: string
+          actor_user_id: string
+          created_at?: string
+          details?: Json | null
+          hoa_id: string
+          id?: string
+          target_id?: string | null
+          target_type: string
+        }
+        Update: {
+          action?: string
+          actor_user_id?: string
+          created_at?: string
+          details?: Json | null
+          hoa_id?: string
+          id?: string
+          target_id?: string | null
+          target_type?: string
+        }
+        Relationships: []
+      }
       contact_messages: {
         Row: {
           created_at: string | null
@@ -746,6 +779,17 @@ export type Database = {
       is_hoa_admin: {
         Args: { hoa_id: string; user_id: string }
         Returns: boolean
+      }
+      log_community_action: {
+        Args: {
+          p_action: string
+          p_actor_user_id: string
+          p_details?: Json
+          p_hoa_id: string
+          p_target_id?: string
+          p_target_type: string
+        }
+        Returns: undefined
       }
       promote_user: {
         Args: { user_id: string }
