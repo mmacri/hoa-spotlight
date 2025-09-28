@@ -132,7 +132,7 @@ export const HOAProfile: React.FC = () => {
           .select('id')
           .eq('hoa_id', hoaData.id)
           .eq('user_id', user.id)
-          .single();
+          .maybeSingle();
 
         if (!userReviewError && userReview) {
           setUserHasReviewed(true);
