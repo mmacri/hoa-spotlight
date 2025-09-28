@@ -21,7 +21,7 @@ export const Header: React.FC = () => {
         <div className="container flex h-14 items-center">
           <Link to="/" className="flex items-center space-x-2">
             <Building2 className="h-6 w-6 text-primary" />
-            <span className="font-bold text-xl">HOAdoor</span>
+            <span className="font-bold text-xl">HOARatings</span>
           </Link>
           
           <nav className="flex items-center space-x-6 ml-6">
@@ -29,7 +29,7 @@ export const Header: React.FC = () => {
               to="/search" 
               className="text-sm font-medium transition-colors hover:text-primary"
             >
-              Search HOAs
+              Browse Communities
             </Link>
           </nav>
           
@@ -37,7 +37,7 @@ export const Header: React.FC = () => {
             <Link to="/search">
               <Button variant="outline" size="sm">
                 <Search className="h-4 w-4 mr-2" />
-                Search
+                Browse
               </Button>
             </Link>
             

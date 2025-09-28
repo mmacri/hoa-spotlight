@@ -54,11 +54,11 @@ export const Homepage: React.FC = () => {
       <section className="relative bg-gradient-to-br from-primary/5 via-background to-secondary/5 py-16">
         <div className="container mx-auto px-4 text-center">
           <h1 className="text-3xl md:text-5xl font-bold mb-4">
-            Find Your Perfect{' '}
+            Connect with Your{' '}
             <span className="text-primary">HOA Community</span>
           </h1>
           <p className="text-lg text-muted-foreground mb-6 max-w-xl mx-auto">
-            Read real reviews from residents and make informed decisions about your next home.
+            Join community forums, share experiences, and connect with neighbors in private and public discussions.
           </p>
           
           <form onSubmit={handleSearch} className="flex max-w-md mx-auto mb-6">
@@ -86,25 +86,25 @@ export const Homepage: React.FC = () => {
           <div className="grid md:grid-cols-3 gap-6 text-center">
             <div>
               <Star className="h-8 w-8 text-primary mx-auto mb-3" />
-              <h3 className="font-semibold mb-2">Real Reviews</h3>
+              <h3 className="font-semibold mb-2">Community Reviews</h3>
               <p className="text-sm text-muted-foreground">
-                Authentic reviews from actual residents
+                Share and read authentic resident experiences
               </p>
             </div>
             
             <div>
               <Users className="h-8 w-8 text-primary mx-auto mb-3" />
-              <h3 className="font-semibold mb-2">Community Access</h3>
+              <h3 className="font-semibold mb-2">Private Forums</h3>
               <p className="text-sm text-muted-foreground">
-                Join private forums and discussions
+                Engage in private community discussions and forums
               </p>
             </div>
             
             <div>
               <Shield className="h-8 w-8 text-primary mx-auto mb-3" />
-              <h3 className="font-semibold mb-2">Transparent Info</h3>
+              <h3 className="font-semibold mb-2">Open Communication</h3>
               <p className="text-sm text-muted-foreground">
-                Complete details about amenities and rules
+                Foster transparent communication within your community
               </p>
             </div>
           </div>
@@ -142,10 +142,10 @@ export const Homepage: React.FC = () => {
         <div className="container mx-auto px-4 text-center">
           <div className="flex items-center justify-center space-x-2 mb-4">
             <Building2 className="h-6 w-6 text-primary" />
-            <span className="text-xl font-bold">HOAdoor</span>
+            <span className="text-xl font-bold">HOARatings</span>
           </div>
           <p className="text-sm text-muted-foreground">
-            &copy; 2024 HOAdoor. Connecting communities, one review at a time.
+            &copy; 2024 HOARatings. Building stronger communities through better communication.
           </p>
         </div>
       </footer>

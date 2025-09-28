@@ -121,14 +121,14 @@ export const SearchPage: React.FC = () => {
       
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-6">Search HOA Communities</h1>
+          <h1 className="text-3xl font-bold mb-6">Browse HOA Communities</h1>
           
           {/* Search Form */}
           <form onSubmit={handleSearch} className="space-y-4">
             <div className="flex gap-4">
               <Input
                 type="text"
-                placeholder="Search HOAs by name, city, or description..."
+                placeholder="Search communities by name, city, or description..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="flex-1"
