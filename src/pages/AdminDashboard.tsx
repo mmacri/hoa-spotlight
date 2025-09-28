@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Header } from '@/components/layout/Header';
 import { ModerationDashboard } from '@/components/moderation/ModerationDashboard';
 import { HOACreationRequests } from '@/components/admin/HOACreationRequests';
+import { RolePromotionRequests } from '@/components/admin/RolePromotionRequests';
+import { UserManagement } from '@/components/admin/UserManagement';
 import { BulkHOAUpload } from '@/components/admin/BulkHOAUpload';
 import { useAuth } from '@/contexts/AuthContext';
 import { Navigate } from 'react-router-dom';
@@ -90,7 +92,7 @@ export const AdminDashboard: React.FC = () => {
         </div>
 
         <Tabs defaultValue="moderation" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="moderation" className="flex items-center gap-2">
               <Shield className="h-4 w-4" />
               Moderation
@@ -98,6 +100,10 @@ export const AdminDashboard: React.FC = () => {
             <TabsTrigger value="hoa-requests" className="flex items-center gap-2">
               <Building2 className="h-4 w-4" />
               HOA Requests
+            </TabsTrigger>
+            <TabsTrigger value="role-requests" className="flex items-center gap-2">
+              <Shield className="h-4 w-4" />
+              Role Requests
             </TabsTrigger>
             <TabsTrigger value="bulk-hoa" className="flex items-center gap-2">
               <Upload className="h-4 w-4" />
@@ -117,17 +123,16 @@ export const AdminDashboard: React.FC = () => {
             <HOACreationRequests />
           </TabsContent>
 
+          <TabsContent value="role-requests" className="mt-6">
+            <RolePromotionRequests />
+          </TabsContent>
+
           <TabsContent value="bulk-hoa" className="mt-6">
             <BulkHOAUpload />
           </TabsContent>
 
           <TabsContent value="users" className="mt-6">
-            <Card>
-              <CardContent className="text-center py-8">
-                <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-muted-foreground">User management features coming soon</p>
-              </CardContent>
-            </Card>
+            <UserManagement />
           </TabsContent>
         </Tabs>
       </div>
