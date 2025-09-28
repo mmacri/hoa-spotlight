@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { Header } from '@/components/layout/Header';
 import { ModerationDashboard } from '@/components/moderation/ModerationDashboard';
+import { HOACreationRequests } from '@/components/admin/HOACreationRequests';
+import { BulkHOAUpload } from '@/components/admin/BulkHOAUpload';
 import { useAuth } from '@/contexts/AuthContext';
 import { Navigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
-import { Shield } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Shield, Building2, Upload, Users } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
 export const AdminDashboard: React.FC = () => {
@@ -86,7 +89,47 @@ export const AdminDashboard: React.FC = () => {
           </p>
         </div>
 
-        <ModerationDashboard />
+        <Tabs defaultValue="moderation" className="w-full">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="moderation" className="flex items-center gap-2">
+              <Shield className="h-4 w-4" />
+              Moderation
+            </TabsTrigger>
+            <TabsTrigger value="hoa-requests" className="flex items-center gap-2">
+              <Building2 className="h-4 w-4" />
+              HOA Requests
+            </TabsTrigger>
+            <TabsTrigger value="bulk-hoa" className="flex items-center gap-2">
+              <Upload className="h-4 w-4" />
+              Bulk HOA Upload
+            </TabsTrigger>
+            <TabsTrigger value="users" className="flex items-center gap-2">
+              <Users className="h-4 w-4" />
+              User Management
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="moderation" className="mt-6">
+            <ModerationDashboard />
+          </TabsContent>
+
+          <TabsContent value="hoa-requests" className="mt-6">
+            <HOACreationRequests />
+          </TabsContent>
+
+          <TabsContent value="bulk-hoa" className="mt-6">
+            <BulkHOAUpload />
+          </TabsContent>
+
+          <TabsContent value="users" className="mt-6">
+            <Card>
+              <CardContent className="text-center py-8">
+                <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <p className="text-muted-foreground">User management features coming soon</p>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );

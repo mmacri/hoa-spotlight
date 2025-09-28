@@ -7,6 +7,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { BulkMemberUpload } from './BulkMemberUpload';
+import { CommentModerationDashboard } from './CommentModerationDashboard';
 import { 
   CheckCircle, 
   XCircle, 
@@ -15,7 +17,9 @@ import {
   MessageSquare,
   Clock,
   Shield,
-  Activity
+  Activity,
+  UserPlus,
+  Upload
 } from 'lucide-react';
 
 interface Review {
@@ -271,14 +275,25 @@ export const CommunityModerationDashboard: React.FC<CommunityModerationDashboard
       </div>
 
       <Tabs defaultValue="reviews" className="w-full">
-        <TabsList>
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="reviews">
+            <MessageSquare className="h-4 w-4 mr-2" />
             Reviews ({reviews.length})
           </TabsTrigger>
           <TabsTrigger value="memberships">
+            <User className="h-4 w-4 mr-2" />
             Memberships ({membershipRequests.length})
           </TabsTrigger>
+          <TabsTrigger value="bulk-upload">
+            <Upload className="h-4 w-4 mr-2" />
+            Bulk Upload
+          </TabsTrigger>
+          <TabsTrigger value="comments">
+            <MessageSquare className="h-4 w-4 mr-2" />
+            Comments
+          </TabsTrigger>
           <TabsTrigger value="audit">
+            <Activity className="h-4 w-4 mr-2" />
             Audit Log ({auditLogs.length})
           </TabsTrigger>
         </TabsList>
@@ -431,6 +446,14 @@ export const CommunityModerationDashboard: React.FC<CommunityModerationDashboard
               </Card>
             )}
           </div>
+        </TabsContent>
+        
+        <TabsContent value="bulk-upload" className="space-y-4 mt-6">
+          <BulkMemberUpload hoaId={hoaId} onComplete={fetchModerationData} />
+        </TabsContent>
+
+        <TabsContent value="comments" className="space-y-4 mt-6">
+          <CommentModerationDashboard hoaId={hoaId} />
         </TabsContent>
         
         <TabsContent value="audit" className="mt-6">

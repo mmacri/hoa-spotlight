@@ -147,6 +147,45 @@ export type Database = {
         }
         Relationships: []
       }
+      bulk_operations: {
+        Row: {
+          created_at: string
+          details: Json | null
+          failed_records: number | null
+          file_name: string | null
+          hoa_id: string | null
+          id: string
+          operation_type: string
+          operator_user_id: string
+          successful_records: number | null
+          total_records: number | null
+        }
+        Insert: {
+          created_at?: string
+          details?: Json | null
+          failed_records?: number | null
+          file_name?: string | null
+          hoa_id?: string | null
+          id?: string
+          operation_type: string
+          operator_user_id: string
+          successful_records?: number | null
+          total_records?: number | null
+        }
+        Update: {
+          created_at?: string
+          details?: Json | null
+          failed_records?: number | null
+          file_name?: string | null
+          hoa_id?: string | null
+          id?: string
+          operation_type?: string
+          operator_user_id?: string
+          successful_records?: number | null
+          total_records?: number | null
+        }
+        Relationships: []
+      }
       comments: {
         Row: {
           author_user_id: string | null
@@ -384,6 +423,63 @@ export type Database = {
           status?: Database["public"]["Enums"]["flag_status"] | null
           target_id?: string
           target_type?: Database["public"]["Enums"]["flag_target"]
+        }
+        Relationships: []
+      }
+      hoa_creation_requests: {
+        Row: {
+          amenities: string[] | null
+          city: string | null
+          created_at: string
+          description_private: string | null
+          description_public: string | null
+          id: string
+          name: string
+          requester_user_id: string
+          review_notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          state: string | null
+          status: Database["public"]["Enums"]["content_status"]
+          unit_count: number | null
+          updated_at: string
+          zip_code: string | null
+        }
+        Insert: {
+          amenities?: string[] | null
+          city?: string | null
+          created_at?: string
+          description_private?: string | null
+          description_public?: string | null
+          id?: string
+          name: string
+          requester_user_id: string
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          state?: string | null
+          status?: Database["public"]["Enums"]["content_status"]
+          unit_count?: number | null
+          updated_at?: string
+          zip_code?: string | null
+        }
+        Update: {
+          amenities?: string[] | null
+          city?: string | null
+          created_at?: string
+          description_private?: string | null
+          description_public?: string | null
+          id?: string
+          name?: string
+          requester_user_id?: string
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          state?: string | null
+          status?: Database["public"]["Enums"]["content_status"]
+          unit_count?: number | null
+          updated_at?: string
+          zip_code?: string | null
         }
         Relationships: []
       }
@@ -768,6 +864,14 @@ export type Database = {
       check_admin_status: {
         Args: { user_id?: string }
         Returns: boolean
+      }
+      create_hoa_from_request: {
+        Args: { admin_user_id: string; request_id: string }
+        Returns: string
+      }
+      generate_hoa_slug: {
+        Args: { hoa_name: string }
+        Returns: string
       }
       get_blog_analytics: {
         Args: Record<PropertyKey, never>
