@@ -1,19 +1,60 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Header } from '@/components/layout/Header';
 import { ModerationDashboard } from '@/components/moderation/ModerationDashboard';
 import { useAuth } from '@/contexts/AuthContext';
 import { Navigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Shield } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 export const AdminDashboard: React.FC = () => {
   const { user } = useAuth();
-  
-  // Check if user is admin (this would typically check a role or permission)
-  const isAdmin = user?.email === 'admin@example.com'; // Placeholder - implement proper admin check
+  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    const checkAdminStatus = async () => {
+      if (!user) {
+        setIsAdmin(false);
+        return;
+      }
+      
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('is_admin')
+          .eq('id', user.id)
+          .single();
+        
+        if (error) {
+          console.error('Error checking admin status:', error);
+          setIsAdmin(false);
+        } else {
+          setIsAdmin(data?.is_admin || false);
+        }
+      } catch (error) {
+        console.error('Error checking admin status:', error);
+        setIsAdmin(false);
+      }
+    };
+
+    checkAdminStatus();
+  }, [user]);
   
   if (!user) {
     return <Navigate to="/" replace />;
+  }
+  
+  if (isAdmin === null) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="container mx-auto px-4 py-8">
+          <div className="text-center">
+            <p className="text-muted-foreground">Checking permissions...</p>
+          </div>
+        </div>
+      </div>
+    );
   }
   
   if (!isAdmin) {
