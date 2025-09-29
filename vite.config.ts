@@ -16,7 +16,7 @@ export default defineConfig(({ mode }) => ({
     },
   },
   // GitHub Pages configuration
-  base: process.env.NODE_ENV === 'production' ? '/hoa-spotlight/' : '/',
+  base: mode === 'production' ? '/hoa-spotlight/' : '/',
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
