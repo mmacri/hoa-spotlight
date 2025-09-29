@@ -210,9 +210,40 @@ export const CommunityPortal: React.FC = () => {
   };
 
   const createPost = async () => {
-    if (!newPost.title.trim() || !newPost.content.trim() || !user || !hoa) return;
+    console.log('createPost called', { 
+      title: newPost.title, 
+      content: newPost.content, 
+      user: !!user, 
+      hoa: !!hoa,
+      titleTrimmed: newPost.title.trim(),
+      contentTrimmed: newPost.content.trim()
+    });
+    
+    if (!newPost.title.trim() || !newPost.content.trim() || !user || !hoa) {
+      console.log('Early return hit', {
+        noTitle: !newPost.title.trim(),
+        noContent: !newPost.content.trim(),
+        noUser: !user,
+        noHoa: !hoa
+      });
+      
+      toast({
+        title: "Missing information",
+        description: "Please fill in both title and content",
+        variant: "destructive"
+      });
+      return;
+    }
 
     try {
+      console.log('Attempting to insert post', {
+        hoa_id: hoa.id,
+        author_user_id: user.id,
+        title: newPost.title,
+        content: newPost.content,
+        visibility: newPost.visibility
+      });
+      
       const { error } = await supabase
         .from('posts')
         .insert({
@@ -223,8 +254,12 @@ export const CommunityPortal: React.FC = () => {
           visibility: newPost.visibility
         });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
+      }
 
+      console.log('Post created successfully');
       toast({
         title: "Post created",
         description: "Your post has been submitted for approval"
@@ -235,6 +270,7 @@ export const CommunityPortal: React.FC = () => {
       fetchCommunityData();
 
     } catch (error: any) {
+      console.error('Error in createPost:', error);
       toast({
         title: "Error creating post",
         description: error.message,
