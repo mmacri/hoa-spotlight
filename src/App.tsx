@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -21,7 +21,7 @@ const App = () => {
   console.log('[Startup] App initialized - basename:', base, 'pathname:', window.location.pathname, 'href:', window.location.href);
   
   // Add unhandled error logging for GitHub Pages debugging
-  React.useEffect(() => {
+  useEffect(() => {
     const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
       console.error('[UnhandledRejection]', {
         reason: event.reason,
