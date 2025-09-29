@@ -14,27 +14,31 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter basename={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-          <Routes>
-            <Route path="/" element={<Homepage />} />
-            <Route path="/search" element={<SearchPage />} />
-            <Route path="/hoa/:slug" element={<HOAProfile />} />
-            <Route path="/community/:slug" element={<CommunityPortal />} />
-            <Route path="/community/:slug/dashboard" element={<CommunityDashboard />} />
-            <Route path="/admin" element={<AdminDashboard />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </AuthProvider>
-  </QueryClientProvider>
-);
+const App = () => {
+  const base = (import.meta.env.BASE_URL || '/').replace(/\/$/, '');
+  console.log('[App] Router basename:', base, 'pathname:', window.location.pathname, 'href:', window.location.href);
+  return (
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter basename={base}>
+            <Routes>
+              <Route path="/" element={<Homepage />} />
+              <Route path="/search" element={<SearchPage />} />
+              <Route path="/hoa/:slug" element={<HOAProfile />} />
+              <Route path="/community/:slug" element={<CommunityPortal />} />
+              <Route path="/community/:slug/dashboard" element={<CommunityDashboard />} />
+              <Route path="/admin" element={<AdminDashboard />} />
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </AuthProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;
