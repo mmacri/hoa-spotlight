@@ -89,13 +89,7 @@ export const CommunityFeed: React.FC<CommunityFeedProps> = ({
     try {
       const { data, error } = await supabase
         .from('posts')
-        .select(`
-          *,
-          profiles!posts_author_user_id_fkey (
-            username,
-            full_name
-          )
-        `)
+        .select('*')
         .eq('hoa_id', hoaId)
         .eq('status', 'APPROVED')
         .order('created_at', { ascending: false });
@@ -104,10 +98,7 @@ export const CommunityFeed: React.FC<CommunityFeedProps> = ({
       
       const postsWithAuthor = (data || []).map(post => ({
         ...post,
-        author: post.profiles ? {
-          username: post.profiles.username || post.profiles.full_name || 'Unknown User',
-          full_name: post.profiles.full_name || post.profiles.username || 'Unknown User'
-        } : undefined
+        author: { username: 'Unknown User', full_name: 'Unknown User' }
       }));
       
       setPosts(postsWithAuthor);
@@ -126,13 +117,7 @@ export const CommunityFeed: React.FC<CommunityFeedProps> = ({
     try {
       const { data, error } = await supabase
         .from('comments')
-        .select(`
-          *,
-          profiles!comments_author_user_id_fkey (
-            username,
-            full_name
-          )
-        `)
+        .select('*')
         .eq('post_id', postId)
         .eq('status', 'APPROVED')
         .order('created_at', { ascending: true });
@@ -141,10 +126,7 @@ export const CommunityFeed: React.FC<CommunityFeedProps> = ({
       
       const commentsWithAuthor = (data || []).map(comment => ({
         ...comment,
-        author: comment.profiles ? {
-          username: comment.profiles.username || comment.profiles.full_name || 'Unknown User',
-          full_name: comment.profiles.full_name || comment.profiles.username || 'Unknown User'
-        } : undefined
+        author: { username: 'Unknown User', full_name: 'Unknown User' }
       }));
       
       setComments(prev => ({ ...prev, [postId]: commentsWithAuthor }));

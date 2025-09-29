@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -293,13 +294,12 @@ export const CommunityGuidanceEditor: React.FC<CommunityGuidanceEditorProps> = (
             <div className="space-y-4">
               <div>
                 <Label htmlFor="title">Title</Label>
-                <Textarea
+                <Input
                   id="title"
                   value={formData.title}
                   onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
                   placeholder="Brief title for this guidance section"
                   className={errors.title ? "border-red-500" : ""}
-                  rows={1}
                 />
                 {errors.title && <p className="text-sm text-red-500 mt-1">{errors.title}</p>}
               </div>
@@ -340,17 +340,16 @@ export const CommunityGuidanceEditor: React.FC<CommunityGuidanceEditorProps> = (
 
                 <div>
                   <Label htmlFor="display_order">Display Order</Label>
-                  <Textarea
-                    id="display_order"
-                    type="number"
-                    value={formData.display_order.toString()}
-                    onChange={(e) => setFormData(prev => ({ 
-                      ...prev, 
-                      display_order: parseInt(e.target.value) || 0 
-                    }))}
-                    className={errors.display_order ? "border-red-500" : ""}
-                    rows={1}
-                  />
+                <Input
+                  id="display_order"
+                  type="number"
+                  value={formData.display_order.toString()}
+                  onChange={(e) => setFormData(prev => ({ 
+                    ...prev, 
+                    display_order: parseInt(e.target.value) || 0 
+                  }))}
+                  className={errors.display_order ? "border-red-500" : ""}
+                />
                   {errors.display_order && <p className="text-sm text-red-500 mt-1">{errors.display_order}</p>}
                 </div>
               </div>
@@ -388,11 +387,10 @@ export const CommunityGuidanceEditor: React.FC<CommunityGuidanceEditorProps> = (
                   <div className="space-y-4">
                     <div>
                       <Label>Title</Label>
-                      <Textarea
+                      <Input
                         value={formData.title}
                         onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
                         className={errors.title ? "border-red-500" : ""}
-                        rows={1}
                       />
                       {errors.title && <p className="text-sm text-red-500 mt-1">{errors.title}</p>}
                     </div>
@@ -430,15 +428,14 @@ export const CommunityGuidanceEditor: React.FC<CommunityGuidanceEditorProps> = (
 
                       <div>
                         <Label>Display Order</Label>
-                        <Textarea
-                          type="number"
-                          value={formData.display_order.toString()}
-                          onChange={(e) => setFormData(prev => ({ 
-                            ...prev, 
-                            display_order: parseInt(e.target.value) || 0 
-                          }))}
-                          rows={1}
-                        />
+                      <Input
+                        type="number"
+                        value={formData.display_order.toString()}
+                        onChange={(e) => setFormData(prev => ({ 
+                          ...prev, 
+                          display_order: parseInt(e.target.value) || 0 
+                        }))}
+                      />
                       </div>
                     </div>
 

@@ -257,6 +257,48 @@ export type Database = {
         }
         Relationships: []
       }
+      community_guidance: {
+        Row: {
+          category: string
+          content: string
+          created_at: string
+          created_by: string
+          display_order: number
+          hoa_id: string
+          id: string
+          is_active: boolean
+          title: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          category?: string
+          content: string
+          created_at?: string
+          created_by: string
+          display_order?: number
+          hoa_id: string
+          id?: string
+          is_active?: boolean
+          title: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          category?: string
+          content?: string
+          created_at?: string
+          created_by?: string
+          display_order?: number
+          hoa_id?: string
+          id?: string
+          is_active?: boolean
+          title?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       community_resources: {
         Row: {
           category: string | null
@@ -967,6 +1009,10 @@ export type Database = {
         Args: { user_id?: string }
         Returns: boolean
       }
+      create_database_backup: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
       create_hoa_from_request: {
         Args: { admin_user_id: string; request_id: string }
         Returns: string
@@ -1012,6 +1058,10 @@ export type Database = {
       refresh_rating_aggregates: {
         Args: Record<PropertyKey, never>
         Returns: undefined
+      }
+      restore_database_backup: {
+        Args: { backup_data: Json; table_selection?: string[] }
+        Returns: string
       }
       sync_missing_profiles: {
         Args: Record<PropertyKey, never>
