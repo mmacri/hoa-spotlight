@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Header } from '@/components/layout/Header';
 import { HOACard, HOA } from '@/components/hoa/HOACard';
 import { Button } from '@/components/ui/button';
@@ -13,6 +13,7 @@ export const Homepage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchFeaturedHOAs = async () => {
@@ -42,7 +43,7 @@ export const Homepage: React.FC = () => {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      window.location.href = `/search?q=${encodeURIComponent(searchQuery.trim())}`;
+      navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
     }
   };
 

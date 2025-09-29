@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
@@ -35,6 +36,7 @@ export const MembershipRequest: React.FC<MembershipRequestProps> = ({
 }) => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   
   const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(false);
@@ -163,7 +165,7 @@ export const MembershipRequest: React.FC<MembershipRequestProps> = ({
                     className="w-full" 
                     onClick={() => {
                       const slug = hoaName.toLowerCase().replace(/\s+/g, '-');
-                      window.location.href = `/community/${slug}`;
+                      navigate(`/community/${slug}`);
                     }}
                   >
                     <LinkIcon className="h-4 w-4 mr-2" />
