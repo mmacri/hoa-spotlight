@@ -77,9 +77,9 @@ export const UserManagement: React.FC = () => {
   });
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [stateFilter, setStateFilter] = useState('');
-  const [communityFilter, setCommunityFilter] = useState('');
-  const [roleFilter, setRoleFilter] = useState('');
+  const [stateFilter, setStateFilter] = useState('all');
+  const [communityFilter, setCommunityFilter] = useState('all');
+  const [roleFilter, setRoleFilter] = useState('all');
   
   // Dialog states
   const [showAddUser, setShowAddUser] = useState(false);
@@ -407,7 +407,7 @@ export const UserManagement: React.FC = () => {
   const filteredCommunities = communities.filter(community => {
     const matchesSearch = community.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       community.city?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesState = !stateFilter || community.state === stateFilter;
+    const matchesState = stateFilter === 'all' || community.state === stateFilter;
     return matchesSearch && matchesState;
   });
 
@@ -420,9 +420,9 @@ export const UserManagement: React.FC = () => {
       user?.username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       community?.name?.toLowerCase().includes(searchTerm.toLowerCase());
     
-    const matchesCommunity = !communityFilter || membership.hoa_id === communityFilter;
-    const matchesRole = !roleFilter || membership.role === roleFilter;
-    const matchesState = !stateFilter || community?.state === stateFilter;
+    const matchesCommunity = communityFilter === 'all' || membership.hoa_id === communityFilter;
+    const matchesRole = roleFilter === 'all' || membership.role === roleFilter;
+    const matchesState = stateFilter === 'all' || community?.state === stateFilter;
     
     return matchesSearch && matchesCommunity && matchesRole && matchesState;
   }).map(membership => ({
@@ -691,7 +691,7 @@ export const UserManagement: React.FC = () => {
                   <SelectValue placeholder="Filter by state" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All States</SelectItem>
+                  <SelectItem value="all">All States</SelectItem>
                   {uniqueStates.map(state => (
                     <SelectItem key={state} value={state}>{state}</SelectItem>
                   ))}
@@ -856,7 +856,7 @@ export const UserManagement: React.FC = () => {
                   <SelectValue placeholder="Filter by state" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All States</SelectItem>
+                  <SelectItem value="all">All States</SelectItem>
                   {uniqueStates.map(state => (
                     <SelectItem key={state} value={state}>{state}</SelectItem>
                   ))}
@@ -868,7 +868,7 @@ export const UserManagement: React.FC = () => {
                   <SelectValue placeholder="Filter by community" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Communities</SelectItem>
+                  <SelectItem value="all">All Communities</SelectItem>
                   {communities.map(community => (
                     <SelectItem key={community.id} value={community.id}>{community.name}</SelectItem>
                   ))}
@@ -880,7 +880,7 @@ export const UserManagement: React.FC = () => {
                   <SelectValue placeholder="Filter by role" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Roles</SelectItem>
+                  <SelectItem value="all">All Roles</SelectItem>
                   <SelectItem value="PRESIDENT">President</SelectItem>
                   <SelectItem value="ADMIN">Admin</SelectItem>
                   <SelectItem value="MEMBER">Member</SelectItem>
