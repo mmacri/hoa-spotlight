@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, Navigate } from 'react-router-dom';
+import { useParams, Navigate, Link } from 'react-router-dom';
 import { Header } from '@/components/layout/Header';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -104,6 +104,7 @@ export const CommunityDashboard: React.FC = () => {
   const [auditLogs, setAuditLogs] = useState<CommunityAuditLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [isPlatformAdmin, setIsPlatformAdmin] = useState(false);
 
   useEffect(() => {
     if (slug && user) {
@@ -113,6 +114,16 @@ export const CommunityDashboard: React.FC = () => {
 
   const fetchCommunityData = async () => {
     try {
+      // Check if user is platform admin first
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('is_admin')
+        .eq('id', user!.id)
+        .single();
+
+      const isUserPlatformAdmin = profileData?.is_admin || false;
+      setIsPlatformAdmin(isUserPlatformAdmin);
+
       // Get HOA details
       const { data: hoaData, error: hoaError } = await supabase
         .from('hoas')
@@ -123,21 +134,26 @@ export const CommunityDashboard: React.FC = () => {
       if (hoaError) throw hoaError;
       setHoa(hoaData);
 
-      // Check membership status - must be admin or president
-      const { data: membershipData, error: membershipError } = await supabase
-        .from('memberships')
-        .select('status, role')
-        .eq('hoa_id', hoaData.id)
-        .eq('user_id', user!.id)
-        .single();
+      // Check membership status - must be admin/president OR platform admin
+      if (!isUserPlatformAdmin) {
+        const { data: membershipData, error: membershipError } = await supabase
+          .from('memberships')
+          .select('status, role')
+          .eq('hoa_id', hoaData.id)
+          .eq('user_id', user!.id)
+          .single();
 
-      if (membershipError || !membershipData || 
-          membershipData.status !== 'APPROVED' ||
-          !['ADMIN', 'PRESIDENT'].includes(membershipData.role)) {
-        return; // User is not authorized
+        if (membershipError || !membershipData || 
+            membershipData.status !== 'APPROVED' ||
+            !['ADMIN', 'PRESIDENT'].includes(membershipData.role)) {
+          return; // User is not authorized
+        }
+
+        setMembership(membershipData);
+      } else {
+        // Platform admin gets full access
+        setMembership({ status: 'APPROVED', role: 'PLATFORM_ADMIN' });
       }
-
-      setMembership(membershipData);
 
       // Fetch management data - simple queries without joins first
       const [membershipRequestsRes, rolePromotionRequestsRes, reviewsRes, auditLogsRes] = await Promise.all([
@@ -310,7 +326,7 @@ export const CommunityDashboard: React.FC = () => {
     );
   }
 
-  if (!membership || !['ADMIN', 'PRESIDENT'].includes(membership.role)) {
+  if (!membership || (!['ADMIN', 'PRESIDENT', 'PLATFORM_ADMIN'].includes(membership.role))) {
     return (
       <div className="min-h-screen bg-background">
         <Header />
@@ -319,7 +335,7 @@ export const CommunityDashboard: React.FC = () => {
             <Shield className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
             <h1 className="text-2xl font-bold mb-2">Access Denied</h1>
             <p className="text-muted-foreground">
-              You need to be a community admin or president to access this dashboard.
+              You need to be a community admin, president, or platform admin to access this dashboard.
             </p>
           </div>
         </div>
@@ -333,10 +349,32 @@ export const CommunityDashboard: React.FC = () => {
       
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">{hoa?.name} - Community Dashboard</h1>
-          <p className="text-muted-foreground">
-            Manage your community as {membership.role.toLowerCase()}
-          </p>
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-3xl font-bold mb-2">{hoa?.name} - Community Dashboard</h1>
+              <p className="text-muted-foreground">
+                {isPlatformAdmin 
+                  ? "Managing as Platform Administrator" 
+                  : `Manage your community as ${membership.role.toLowerCase()}`}
+              </p>
+            </div>
+            {isPlatformAdmin && (
+              <div className="flex gap-2">
+                <Link to="/admin">
+                  <Button variant="outline">
+                    <Shield className="h-4 w-4 mr-2" />
+                    Platform Admin
+                  </Button>
+                </Link>
+                <Link to={`/community/${slug}`}>
+                  <Button variant="outline">
+                    <Building2 className="h-4 w-4 mr-2" />
+                    Community Portal
+                  </Button>
+                </Link>
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
