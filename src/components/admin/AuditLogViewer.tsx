@@ -37,6 +37,9 @@ interface AuditLog {
 interface HOA {
   id: string;
   name: string;
+  city: string;
+  state: string;
+  zip_code: string;
 }
 
 export const AuditLogViewer: React.FC = () => {
@@ -46,6 +49,10 @@ export const AuditLogViewer: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [actionFilter, setActionFilter] = useState('all');
   const [communityFilter, setCommunityFilter] = useState('all');
+  const [stateFilter, setStateFilter] = useState('');
+  const [cityFilter, setCityFilter] = useState('');
+  const [zipCodeFilter, setZipCodeFilter] = useState('');
+  const [hoaNameFilter, setHoaNameFilter] = useState('');
   const [dateFromFilter, setDateFromFilter] = useState('');
   const [dateToFilter, setDateToFilter] = useState('');
   const [page, setPage] = useState(1);
@@ -57,13 +64,13 @@ export const AuditLogViewer: React.FC = () => {
   useEffect(() => {
     fetchHOAs();
     fetchAuditLogs(1);
-  }, [actionFilter, communityFilter, dateFromFilter, dateToFilter]);
+  }, [actionFilter, communityFilter, stateFilter, cityFilter, zipCodeFilter, hoaNameFilter, dateFromFilter, dateToFilter]);
 
   const fetchHOAs = async () => {
     try {
       const { data, error } = await supabase
         .from('hoas')
-        .select('id, name')
+        .select('id, name, city, state, zip_code')
         .order('name');
       
       if (error) throw error;
@@ -99,6 +106,28 @@ export const AuditLogViewer: React.FC = () => {
       if (communityFilter !== 'all') {
         // Filter by HOA ID in metadata for HOA-related actions
         query = query.or(`metadata->>hoa_id.eq.${communityFilter},metadata->>hoa_name.ilike.%${hoas.find(h => h.id === communityFilter)?.name}%`);
+      }
+
+      // Location-based filters
+      if (stateFilter || cityFilter || zipCodeFilter || hoaNameFilter) {
+        const locationFilters = [];
+        
+        if (stateFilter) {
+          locationFilters.push(`metadata->>state.ilike.%${stateFilter}%`);
+        }
+        if (cityFilter) {
+          locationFilters.push(`metadata->>city.ilike.%${cityFilter}%`);
+        }
+        if (zipCodeFilter) {
+          locationFilters.push(`metadata->>zip_code.ilike.%${zipCodeFilter}%`);
+        }
+        if (hoaNameFilter) {
+          locationFilters.push(`metadata->>hoa_name.ilike.%${hoaNameFilter}%`);
+        }
+        
+        if (locationFilters.length > 0) {
+          query = query.or(locationFilters.join(','));
+        }
       }
 
       // Date filters
@@ -244,7 +273,9 @@ export const AuditLogViewer: React.FC = () => {
               <SelectContent>
                 <SelectItem value="all">All Communities</SelectItem>
                 {hoas.map(hoa => (
-                  <SelectItem key={hoa.id} value={hoa.id}>{hoa.name}</SelectItem>
+                  <SelectItem key={hoa.id} value={hoa.id}>
+                    {hoa.name} - {hoa.city}, {hoa.state}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -267,6 +298,52 @@ export const AuditLogViewer: React.FC = () => {
               className="w-40"
             />
           </div>
+        </div>
+
+        {/* Location Filters */}
+        <div className="flex flex-col md:flex-row gap-4 mt-4">
+          <Input
+            placeholder="Filter by state..."
+            value={stateFilter}
+            onChange={(e) => setStateFilter(e.target.value)}
+            className="w-48"
+          />
+          <Input
+            placeholder="Filter by city..."
+            value={cityFilter}
+            onChange={(e) => setCityFilter(e.target.value)}
+            className="w-48"
+          />
+          <Input
+            placeholder="Filter by zip code..."
+            value={zipCodeFilter}
+            onChange={(e) => setZipCodeFilter(e.target.value)}
+            className="w-48"
+          />
+          <Input
+            placeholder="Filter by HOA name..."
+            value={hoaNameFilter}
+            onChange={(e) => setHoaNameFilter(e.target.value)}
+            className="w-48"
+          />
+          {(stateFilter || cityFilter || zipCodeFilter || hoaNameFilter || communityFilter !== 'all' || actionFilter !== 'all' || dateFromFilter || dateToFilter) && (
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setStateFilter('');
+                setCityFilter('');
+                setZipCodeFilter('');
+                setHoaNameFilter('');
+                setCommunityFilter('all');
+                setActionFilter('all');
+                setDateFromFilter('');
+                setDateToFilter('');
+              }}
+              className="w-auto"
+            >
+              Clear All Filters
+            </Button>
+          )}
         </div>
       </div>
 
