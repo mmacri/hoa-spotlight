@@ -12,6 +12,9 @@ import { Separator } from '@/components/ui/separator';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { EventManagement } from '@/components/events/EventManagement';
+import { CommunityResourcesManager } from '@/components/community/CommunityResourcesManager';
+import { DocumentManagement } from '@/components/community/DocumentManagement';
 import { 
   Users, 
   FileText, 
@@ -109,6 +112,9 @@ export const CommunityPortal: React.FC = () => {
   const [adminResponses, setAdminResponses] = useState<AdminResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [showNewPost, setShowNewPost] = useState(false);
+  const [showDocumentForm, setShowDocumentForm] = useState(false);
+  const [showEventForm, setShowEventForm] = useState(false);
+  const [showResourceForm, setShowResourceForm] = useState(false);
   const [newPost, setNewPost] = useState({ title: '', content: '', visibility: 'PRIVATE' as 'PRIVATE' | 'PUBLIC' });
 
   useEffect(() => {
@@ -236,6 +242,23 @@ export const CommunityPortal: React.FC = () => {
     }
   };
 
+  const isAdminOrPresident = membership?.role === 'ADMIN' || membership?.role === 'PRESIDENT';
+
+  const handleDocumentAdded = () => {
+    setShowDocumentForm(false);
+    fetchCommunityData();
+  };
+
+  const handleEventAdded = () => {
+    setShowEventForm(false);
+    fetchCommunityData();
+  };
+
+  const handleResourceAdded = () => {
+    setShowResourceForm(false);
+    fetchCommunityData();
+  };
+
   if (!user) {
     return <Navigate to="/" replace />;
   }
@@ -285,7 +308,7 @@ export const CommunityPortal: React.FC = () => {
               Welcome to your private community space
             </p>
           </div>
-          {(membership.role === 'ADMIN' || membership.role === 'PRESIDENT') && (
+          {isAdminOrPresident && (
             <Link to={`/community/${slug}/dashboard`}>
               <Button>
                 <Shield className="h-4 w-4 mr-2" />
@@ -671,13 +694,22 @@ export const CommunityPortal: React.FC = () => {
             <div className="space-y-6">
               <div className="flex justify-between items-center">
                 <h2 className="text-2xl font-semibold">Document Library</h2>
-                {(membership.role === 'ADMIN' || membership.role === 'PRESIDENT') && (
-                  <Button>
+                {isAdminOrPresident && (
+                  <Button onClick={() => setShowDocumentForm(true)}>
                     <Upload className="h-4 w-4 mr-2" />
-                    Upload Document
+                    Add Document
                   </Button>
                 )}
               </div>
+
+              {showDocumentForm && (
+                <DocumentManagement
+                  hoaId={hoa!.id}
+                  isAdmin={isAdminOrPresident}
+                  onDocumentAdded={handleDocumentAdded}
+                  onCancel={() => setShowDocumentForm(false)}
+                />
+              )}
 
               <div className="grid gap-4">
                 {documents.map((doc) => (
@@ -722,64 +754,71 @@ export const CommunityPortal: React.FC = () => {
           <TabsContent value="events" className="mt-6">
             <div className="space-y-6">
               <div className="flex justify-between items-center">
-                <h2 className="text-2xl font-semibold">Upcoming Events</h2>
-                {(membership.role === 'ADMIN' || membership.role === 'PRESIDENT') && (
-                  <Button>
+                <h2 className="text-2xl font-semibold">Community Events</h2>
+                {isAdminOrPresident && (
+                  <Button onClick={() => setShowEventForm(true)}>
                     <Plus className="h-4 w-4 mr-2" />
                     Create Event
                   </Button>
                 )}
               </div>
 
-              <div className="grid gap-4">
-                {events.map((event) => (
-                  <Card key={event.id}>
-                    <CardContent className="p-4">
-                      <div className="flex items-start space-x-4">
-                        <div className="bg-primary text-primary-foreground rounded-lg p-3 text-center min-w-[60px]">
-                          <div className="text-sm font-medium">
-                            {new Date(event.starts_at).toLocaleDateString('en-US', { month: 'short' })}
+              {showEventForm ? (
+                <EventManagement
+                  hoaId={hoa!.id}
+                  isAdmin={isAdminOrPresident}
+                />
+              ) : (
+                <div className="grid gap-4">
+                  {events.map((event) => (
+                    <Card key={event.id}>
+                      <CardContent className="p-4">
+                        <div className="flex items-start space-x-4">
+                          <div className="bg-primary text-primary-foreground rounded-lg p-3 text-center min-w-[60px]">
+                            <div className="text-sm font-medium">
+                              {new Date(event.starts_at).toLocaleDateString('en-US', { month: 'short' })}
+                            </div>
+                            <div className="text-lg font-bold">
+                              {new Date(event.starts_at).getDate()}
+                            </div>
                           </div>
-                          <div className="text-lg font-bold">
-                            {new Date(event.starts_at).getDate()}
-                          </div>
-                        </div>
-                        <div className="flex-1">
-                          <h3 className="font-semibold text-lg">{event.title}</h3>
-                          <div className="flex items-center text-sm text-muted-foreground mt-1 mb-2">
-                            <Clock className="h-4 w-4 mr-1" />
-                            {new Date(event.starts_at).toLocaleTimeString('en-US', { 
-                              hour: 'numeric', 
-                              minute: '2-digit',
-                              hour12: true 
-                            })}
-                            {event.location && (
-                              <>
-                                <span className="mx-2">•</span>
-                                <MapPin className="h-4 w-4 mr-1" />
-                                {event.location}
-                              </>
+                          <div className="flex-1">
+                            <h3 className="font-semibold text-lg">{event.title}</h3>
+                            <div className="flex items-center text-sm text-muted-foreground mt-1 mb-2">
+                              <Clock className="h-4 w-4 mr-1" />
+                              {new Date(event.starts_at).toLocaleTimeString('en-US', { 
+                                hour: 'numeric', 
+                                minute: '2-digit',
+                                hour12: true 
+                              })}
+                              {event.location && (
+                                <>
+                                  <span className="mx-2">•</span>
+                                  <MapPin className="h-4 w-4 mr-1" />
+                                  {event.location}
+                                </>
+                              )}
+                            </div>
+                            {event.description && (
+                              <p className="text-muted-foreground">{event.description}</p>
                             )}
                           </div>
-                          {event.description && (
-                            <p className="text-muted-foreground">{event.description}</p>
-                          )}
                         </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-                
-                {events.length === 0 && (
-                  <div className="text-center py-12">
-                    <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold mb-2">No upcoming events</h3>
-                    <p className="text-muted-foreground">
-                      Community events will be announced here
-                    </p>
-                  </div>
-                )}
-              </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                  
+                  {events.length === 0 && (
+                    <div className="text-center py-12">
+                      <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                      <h3 className="text-lg font-semibold mb-2">No upcoming events</h3>
+                      <p className="text-muted-foreground">
+                        Community events will be announced here
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </TabsContent>
 
@@ -787,134 +826,143 @@ export const CommunityPortal: React.FC = () => {
             <div className="space-y-6">
               <div className="flex justify-between items-center">
                 <h2 className="text-2xl font-semibold">Community Resources</h2>
-                {(membership.role === 'ADMIN' || membership.role === 'PRESIDENT') && (
-                  <Button>
+                {isAdminOrPresident && (
+                  <Button onClick={() => setShowResourceForm(true)}>
                     <Plus className="h-4 w-4 mr-2" />
                     Add Resource
                   </Button>
                 )}
               </div>
 
-              {/* Resource Categories */}
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <ExternalLink className="h-5 w-5 text-blue-500" />
-                      Important Links
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <div className="space-y-2">
-                      <Button variant="outline" className="w-full justify-start" size="sm">
-                        <ExternalLink className="h-4 w-4 mr-2" />
-                        HOA Management Portal
-                      </Button>
-                      <Button variant="outline" className="w-full justify-start" size="sm">
-                        <ExternalLink className="h-4 w-4 mr-2" />
-                        Maintenance Requests
-                      </Button>
-                      <Button variant="outline" className="w-full justify-start" size="sm">
-                        <ExternalLink className="h-4 w-4 mr-2" />
-                        Payment Portal
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <FileText className="h-5 w-5 text-green-500" />
-                      Forms & Documents
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <div className="space-y-2">
-                      <Button variant="outline" className="w-full justify-start" size="sm">
-                        <Download className="h-4 w-4 mr-2" />
-                        Architectural Request Form
-                      </Button>
-                      <Button variant="outline" className="w-full justify-start" size="sm">
-                        <Download className="h-4 w-4 mr-2" />
-                        HOA Bylaws
-                      </Button>
-                      <Button variant="outline" className="w-full justify-start" size="sm">
-                        <Download className="h-4 w-4 mr-2" />
-                        Community Guidelines
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Users className="h-5 w-5 text-purple-500" />
-                      Contact Information
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <div className="space-y-2 text-sm">
-                      <div>
-                        <p className="font-medium">Management Office</p>
-                        <p className="text-muted-foreground">Mon-Fri 9AM-5PM</p>
-                        <p className="text-muted-foreground">(555) 123-4567</p>
-                      </div>
-                      <Separator />
-                      <div>
-                        <p className="font-medium">Emergency Maintenance</p>
-                        <p className="text-muted-foreground">24/7 Available</p>
-                        <p className="text-muted-foreground">(555) 987-6543</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* Community Guidelines */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <BookOpen className="h-5 w-5 text-orange-500" />
-                    Community Guidelines
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="prose prose-sm max-w-none">
-                    <ul className="space-y-2">
-                      <li>Respect your neighbors and maintain community standards</li>
-                      <li>Follow architectural guidelines for any modifications</li>
-                      <li>Keep common areas clean and accessible</li>
-                      <li>Report maintenance issues promptly through proper channels</li>
-                      <li>Participate in community meetings and votes when possible</li>
-                    </ul>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {hoa?.description_private && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Community Information</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div>
-                        <h4 className="font-semibold mb-2">Your Membership</h4>
-                        <div className="flex items-center space-x-2">
-                          <Badge variant="outline">{membership.role}</Badge>
-                          <Badge variant="secondary">{membership.status}</Badge>
+              {showResourceForm ? (
+                <CommunityResourcesManager
+                  hoaId={hoa!.id}
+                  isAdmin={isAdminOrPresident}
+                />
+              ) : (
+                <div className="space-y-6">
+                  {/* Resource Categories */}
+                  <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <ExternalLink className="h-5 w-5 text-blue-500" />
+                          Important Links
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-3">
+                        <div className="space-y-2">
+                          <Button variant="outline" className="w-full justify-start" size="sm">
+                            <ExternalLink className="h-4 w-4 mr-2" />
+                            HOA Management Portal
+                          </Button>
+                          <Button variant="outline" className="w-full justify-start" size="sm">
+                            <ExternalLink className="h-4 w-4 mr-2" />
+                            Maintenance Requests
+                          </Button>
+                          <Button variant="outline" className="w-full justify-start" size="sm">
+                            <ExternalLink className="h-4 w-4 mr-2" />
+                            Payment Portal
+                          </Button>
                         </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <FileText className="h-5 w-5 text-green-500" />
+                          Forms & Documents
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-3">
+                        <div className="space-y-2">
+                          <Button variant="outline" className="w-full justify-start" size="sm">
+                            <Download className="h-4 w-4 mr-2" />
+                            Architectural Request Form
+                          </Button>
+                          <Button variant="outline" className="w-full justify-start" size="sm">
+                            <Download className="h-4 w-4 mr-2" />
+                            HOA Bylaws
+                          </Button>
+                          <Button variant="outline" className="w-full justify-start" size="sm">
+                            <Download className="h-4 w-4 mr-2" />
+                            Community Guidelines
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Users className="h-5 w-5 text-purple-500" />
+                          Contact Information
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-3">
+                        <div className="space-y-2 text-sm">
+                          <div>
+                            <p className="font-medium">Management Office</p>
+                            <p className="text-muted-foreground">Mon-Fri 9AM-5PM</p>
+                            <p className="text-muted-foreground">(555) 123-4567</p>
+                          </div>
+                          <Separator />
+                          <div>
+                            <p className="font-medium">Emergency Maintenance</p>
+                            <p className="text-muted-foreground">24/7 Available</p>
+                            <p className="text-muted-foreground">(555) 987-6543</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  {/* Community Guidelines */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <BookOpen className="h-5 w-5 text-orange-500" />
+                        Community Guidelines
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="prose prose-sm max-w-none">
+                        <ul className="space-y-2">
+                          <li>Respect your neighbors and maintain community standards</li>
+                          <li>Follow architectural guidelines for any modifications</li>
+                          <li>Keep common areas clean and accessible</li>
+                          <li>Report maintenance issues promptly through proper channels</li>
+                          <li>Participate in community meetings and votes when possible</li>
+                        </ul>
                       </div>
-                      
-                      <div>
-                        <h4 className="font-semibold mb-2">Private Community Description</h4>
-                        <p className="text-muted-foreground">{hoa.description_private}</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                    </CardContent>
+                  </Card>
+
+                  {hoa?.description_private && (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Community Information</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-4">
+                          <div>
+                            <h4 className="font-semibold mb-2">Your Membership</h4>
+                            <div className="flex items-center space-x-2">
+                              <Badge variant="outline">{membership.role}</Badge>
+                              <Badge variant="secondary">{membership.status}</Badge>
+                            </div>
+                          </div>
+                          
+                          <div>
+                            <h4 className="font-semibold mb-2">Private Community Description</h4>
+                            <p className="text-muted-foreground">{hoa.description_private}</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+                </div>
               )}
             </div>
           </TabsContent>
