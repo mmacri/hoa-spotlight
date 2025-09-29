@@ -72,9 +72,15 @@ export const SearchPage: React.FC = () => {
         .from('hoas')
         .select('*');
 
-      // Text search
+      // Text search with fallback
       if (searchQuery.trim()) {
-        query = query.textSearch('search_vector', searchQuery.trim());
+        try {
+          query = query.textSearch('search_vector', searchQuery.trim());
+        } catch (searchError) {
+          // Fallback to basic text search if full-text search fails
+          console.warn('Full-text search failed, using fallback:', searchError);
+          query = query.or(`name.ilike.%${searchQuery.trim()}%,description_public.ilike.%${searchQuery.trim()}%,city.ilike.%${searchQuery.trim()}%`);
+        }
       }
 
       // State filter
