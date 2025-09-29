@@ -28,8 +28,6 @@ import {
   MapPin,
   Filter
 } from 'lucide-react';
-import { DeletionManagement } from '@/components/admin/DeletionManagement';
-import { RolePromotionRequests } from '@/components/admin/RolePromotionRequests';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -58,23 +56,14 @@ interface Membership {
   hoa_id: string;
   role: 'MEMBER' | 'ADMIN' | 'PRESIDENT';
   status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  user?: UserProfile;
+  hoa?: HOACommunity;
 }
 
-interface AllRequests {
-  membershipRequests: any[];
-  hoaCreationRequests: any[];
-  rolePromotionRequests: any[];
-}
-
-export const UserManagement: React.FC = () => {
+export const ComprehensiveUserManagement: React.FC = () => {
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [communities, setCommunities] = useState<HOACommunity[]>([]);
   const [memberships, setMemberships] = useState<Membership[]>([]);
-  const [allRequests, setAllRequests] = useState<AllRequests>({
-    membershipRequests: [],
-    hoaCreationRequests: [],
-    rolePromotionRequests: []
-  });
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [stateFilter, setStateFilter] = useState('');
@@ -98,95 +87,22 @@ export const UserManagement: React.FC = () => {
 
   const fetchData = async () => {
     try {
-      const [usersRes, communitiesRes, membershipsRes, membershipRes, hoaRequestsRes, rolePromotionRes] = await Promise.all([
-        // Fetch all users with their profiles
+      const [usersRes, communitiesRes, membershipsRes] = await Promise.all([
         supabase
           .from('profiles')
-          .select(`
-            id,
-            username,
-            full_name,
-            is_admin,
-            created_at
-          `)
+          .select('id, username, full_name, is_admin, created_at')
           .order('full_name', { ascending: true }),
         
-        // Fetch all communities
         supabase
           .from('hoas')
-          .select(`
-            id,
-            name,
-            slug,
-            city,
-            state,
-            zip_code,
-            unit_count,
-            created_at
-          `)
+          .select('id, name, slug, city, state, zip_code, unit_count, created_at')
           .order('state', { ascending: true }),
         
-        // Fetch all memberships with user and hoa details
         supabase
           .from('memberships')
-          .select(`
-            id,
-            user_id,
-            hoa_id,
-            role,
-            status
-          `)
+          .select('id, user_id, hoa_id, role, status')
           .eq('status', 'APPROVED')
-          .order('role', { ascending: false }),
-        
-        // Fetch all pending membership requests
-        supabase
-          .from('memberships')
-          .select(`
-            id,
-            user_id,
-            hoa_id,
-            role,
-            status,
-            requested_at,
-            hoa:hoas(name),
-            user:profiles(full_name, username)
-          `)
-          .eq('status', 'PENDING')
-          .order('requested_at', { ascending: true }),
-        
-        // Fetch all pending HOA creation requests
-        supabase
-          .from('hoa_creation_requests')
-          .select(`
-            id,
-            name,
-            requester_user_id,
-            status,
-            created_at,
-            city,
-            state,
-            requester:profiles(full_name, username)
-          `)
-          .eq('status', 'PENDING')
-          .order('created_at', { ascending: true }),
-        
-        // Fetch all pending role promotion requests
-        supabase
-          .from('role_promotion_requests')
-          .select(`
-            id,
-            requester_user_id,
-            hoa_id,
-            current_membership_role,
-            requested_role,
-            status,
-            created_at,
-            hoa:hoas(name),
-            requester:profiles(full_name, username)
-          `)
-          .eq('status', 'PENDING')
-          .order('created_at', { ascending: true })
+          .order('role', { ascending: false })
       ]);
 
       if (usersRes.error) throw usersRes.error;
@@ -196,11 +112,6 @@ export const UserManagement: React.FC = () => {
       setUsers(usersRes.data || []);
       setCommunities(communitiesRes.data || []);
       setMemberships(membershipsRes.data || []);
-      setAllRequests({
-        membershipRequests: membershipRes.data || [],
-        hoaCreationRequests: hoaRequestsRes.data || [],
-        rolePromotionRequests: rolePromotionRes.data || []
-      });
 
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -433,11 +344,6 @@ export const UserManagement: React.FC = () => {
 
   const uniqueStates = [...new Set(communities.map(c => c.state))].filter(Boolean).sort();
 
-  const totalPendingRequests = 
-    allRequests.membershipRequests.length + 
-    allRequests.hoaCreationRequests.length + 
-    allRequests.rolePromotionRequests.length;
-
   if (loading) {
     return <div className="text-center py-8">Loading user management data...</div>;
   }
@@ -445,9 +351,9 @@ export const UserManagement: React.FC = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold mb-2">User Management</h2>
+        <h2 className="text-2xl font-bold mb-2">Comprehensive User Management</h2>
         <p className="text-muted-foreground">
-          Manage platform users and review pending requests
+          Manage users, communities, and role assignments with powerful filtering and search
         </p>
       </div>
 
@@ -503,10 +409,10 @@ export const UserManagement: React.FC = () => {
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center space-x-2">
-              <Clock className="h-8 w-8 text-orange-500" />
+              <Settings className="h-8 w-8 text-orange-500" />
               <div>
-                <p className="text-2xl font-bold">{totalPendingRequests}</p>
-                <p className="text-sm text-muted-foreground">Pending Requests</p>
+                <p className="text-2xl font-bold">{memberships.filter(m => m.role === 'ADMIN').length}</p>
+                <p className="text-sm text-muted-foreground">HOA Admins</p>
               </div>
             </div>
           </CardContent>
@@ -514,7 +420,7 @@ export const UserManagement: React.FC = () => {
       </div>
 
       <Tabs defaultValue="users" className="w-full">
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="users">
             <Users className="h-4 w-4 mr-2" />
             Users ({users.length})
@@ -527,18 +433,6 @@ export const UserManagement: React.FC = () => {
             <Settings className="h-4 w-4 mr-2" />
             Role Management ({memberships.length})
           </TabsTrigger>
-          <TabsTrigger value="membership-requests">
-            <User className="h-4 w-4 mr-2" />
-            Memberships ({allRequests.membershipRequests.length})
-          </TabsTrigger>
-          <TabsTrigger value="role-requests">
-            <Shield className="h-4 w-4 mr-2" />
-            Role Requests ({allRequests.rolePromotionRequests.length})
-          </TabsTrigger>
-          <TabsTrigger value="hoa-requests">
-            <Building2 className="h-4 w-4 mr-2" />
-            HOA Requests ({allRequests.hoaCreationRequests.length})
-          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="users" className="mt-6">
@@ -547,7 +441,7 @@ export const UserManagement: React.FC = () => {
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                 <Input
-                  placeholder="Search users..."
+                  placeholder="Search users by name or username..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
@@ -631,7 +525,6 @@ export const UserManagement: React.FC = () => {
                         <p className="text-sm text-muted-foreground mb-2">
                           @{user.username} • Joined {new Date(user.created_at).toLocaleDateString()}
                         </p>
-
                       </div>
 
                       <div className="flex space-x-2">
@@ -844,7 +737,7 @@ export const UserManagement: React.FC = () => {
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                 <Input
-                  placeholder="Search members..."
+                  placeholder="Search members by name, community..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
@@ -935,130 +828,6 @@ export const UserManagement: React.FC = () => {
                 );
               })}
             </div>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="membership-requests" className="mt-6">
-          <div className="space-y-4">
-            {allRequests.membershipRequests.map((request) => (
-              <Card key={request.id}>
-                <CardContent className="p-4">
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <p className="font-medium">
-                        {request.user?.full_name || request.user?.username || 'Unknown User'}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        Requesting to join: {request.hoa?.name}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        Requested: {new Date(request.requested_at).toLocaleDateString()}
-                      </p>
-                    </div>
-                    <Badge variant="secondary">
-                      <Clock className="h-3 w-3 mr-1" />
-                      Pending
-                    </Badge>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-            
-            {allRequests.membershipRequests.length === 0 && (
-              <Card>
-                <CardContent className="text-center py-8">
-                  <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-4" />
-                  <p className="text-muted-foreground">No pending membership requests</p>
-                </CardContent>
-              </Card>
-            )}
-          </div>
-        </TabsContent>
-
-        <TabsContent value="role-requests" className="mt-6">
-          <div className="space-y-4">
-            {allRequests.rolePromotionRequests.map((request) => {
-              const FromIcon = getRoleIcon(request.current_membership_role);
-              const ToIcon = getRoleIcon(request.requested_role);
-              
-              return (
-                <Card key={request.id}>
-                  <CardContent className="p-4">
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <p className="font-medium">
-                          {request.requester?.full_name || request.requester?.username || 'Unknown User'}
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          In: {request.hoa?.name}
-                        </p>
-                        <div className="flex items-center space-x-2 mt-1">
-                          <FromIcon className="h-4 w-4" />
-                          <span className="text-sm">{request.current_membership_role}</span>
-                          <span className="text-muted-foreground">→</span>
-                          <ToIcon className="h-4 w-4" />
-                          <span className="text-sm">{request.requested_role}</span>
-                        </div>
-                        <p className="text-xs text-muted-foreground">
-                          Requested: {new Date(request.created_at).toLocaleDateString()}
-                        </p>
-                      </div>
-                      <Badge variant="secondary">
-                        <Clock className="h-3 w-3 mr-1" />
-                        Pending
-                      </Badge>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
-            
-            {allRequests.rolePromotionRequests.length === 0 && (
-              <Card>
-                <CardContent className="text-center py-8">
-                  <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-4" />
-                  <p className="text-muted-foreground">No pending role promotion requests</p>
-                </CardContent>
-              </Card>
-            )}
-          </div>
-        </TabsContent>
-
-        <TabsContent value="hoa-requests" className="mt-6">
-          <div className="space-y-4">
-            {allRequests.hoaCreationRequests.map((request) => (
-              <Card key={request.id}>
-                <CardContent className="p-4">
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <p className="font-medium">{request.name}</p>
-                      <p className="text-sm text-muted-foreground">
-                        Requested by: {request.requester?.full_name || request.requester?.username || 'Unknown'}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        Location: {request.city}, {request.state}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        Requested: {new Date(request.created_at).toLocaleDateString()}
-                      </p>
-                    </div>
-                    <Badge variant="secondary">
-                      <Clock className="h-3 w-3 mr-1" />
-                      Pending
-                    </Badge>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-            
-            {allRequests.hoaCreationRequests.length === 0 && (
-              <Card>
-                <CardContent className="text-center py-8">
-                  <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-4" />
-                  <p className="text-muted-foreground">No pending HOA creation requests</p>
-                </CardContent>
-              </Card>
-            )}
           </div>
         </TabsContent>
       </Tabs>

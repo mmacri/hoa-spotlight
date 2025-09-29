@@ -3,7 +3,7 @@ import { Header } from '@/components/layout/Header';
 import { ModerationDashboard } from '@/components/moderation/ModerationDashboard';
 import { HOACreationRequests } from '@/components/admin/HOACreationRequests';
 import { RolePromotionRequests } from '@/components/admin/RolePromotionRequests';
-import { UserManagement } from '@/components/admin/UserManagement';
+import { ComprehensiveUserManagement } from '@/components/admin/ComprehensiveUserManagement';
 import { BulkHOAUpload } from '@/components/admin/BulkHOAUpload';
 import { DeletionManagement } from '@/components/admin/DeletionManagement';
 import { AuditLogViewer } from '@/components/admin/AuditLogViewer';
@@ -313,7 +313,7 @@ export const AdminDashboard: React.FC = () => {
           </TabsContent>
 
           <TabsContent value="users" className="mt-6">
-            <UserManagement />
+            <ComprehensiveUserManagement />
           </TabsContent>
 
           <TabsContent value="deletion" className="mt-6">
