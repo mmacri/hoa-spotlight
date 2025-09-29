@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, Navigate } from 'react-router-dom';
+import { useParams, Navigate, Link } from 'react-router-dom';
 import { Header } from '@/components/layout/Header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -19,9 +19,11 @@ import {
   Plus,
   Upload,
   Download,
+  Shield,
+  Crown,
+  User,
   Clock,
-  MapPin,
-  User
+  MapPin
 } from 'lucide-react';
 
 interface HOADetails {
@@ -225,12 +227,22 @@ export const CommunityPortal: React.FC = () => {
       <Header />
       
       <div className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">{hoa?.name} Community Portal</h1>
-          <p className="text-muted-foreground">
-            Welcome to your private community space
-          </p>
-        </div>
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-3xl font-bold mb-2">{hoa?.name} Community Portal</h1>
+              <p className="text-muted-foreground">
+                Welcome to your private community space
+              </p>
+            </div>
+            {(membership.role === 'ADMIN' || membership.role === 'PRESIDENT') && (
+              <Link to={`/community/${slug}/dashboard`}>
+                <Button>
+                  <Shield className="h-4 w-4 mr-2" />
+                  Community Dashboard
+                </Button>
+              </Link>
+            )}
+          </div>
 
         <Tabs defaultValue="forum" className="w-full">
           <TabsList className="grid w-full grid-cols-4">

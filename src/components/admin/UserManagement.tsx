@@ -43,6 +43,9 @@ export const UserManagement: React.FC = () => {
   });
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [stateFilter, setStateFilter] = useState('');
+  const [cityFilter, setCityFilter] = useState('');
+  const [zipCodeFilter, setZipCodeFilter] = useState('');
   const { toast } = useToast();
 
   useEffect(() => {
@@ -170,10 +173,14 @@ export const UserManagement: React.FC = () => {
     }
   };
 
-  const filteredUsers = users.filter(user =>
-    user.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.username?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredUsers = users.filter(user => {
+    const matchesSearch = user.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.username?.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    // For now, we can't filter users by location directly since user profiles don't have location
+    // But we can implement this when we add location fields to profiles
+    return matchesSearch;
+  });
 
   const totalPendingRequests = 
     allRequests.membershipRequests.length + 
@@ -264,14 +271,36 @@ export const UserManagement: React.FC = () => {
         </TabsList>
 
         <TabsContent value="users" className="mt-6">
-          <div className="space-y-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+            <div className="space-y-4">
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                <Input
+                  placeholder="Search users..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              
+              {/* Location filters for future use */}
               <Input
-                placeholder="Search users..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                placeholder="Filter by state..."
+                value={stateFilter}
+                onChange={(e) => setStateFilter(e.target.value)}
+                className="w-48"
+              />
+              <Input
+                placeholder="Filter by city..."
+                value={cityFilter}
+                onChange={(e) => setCityFilter(e.target.value)}
+                className="w-48"
+              />
+              <Input
+                placeholder="Filter by zip code..."
+                value={zipCodeFilter}
+                onChange={(e) => setZipCodeFilter(e.target.value)}
+                className="w-48"
               />
             </div>
 

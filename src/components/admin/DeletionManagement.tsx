@@ -52,13 +52,16 @@ export const DeletionManagement: React.FC = () => {
   const [items, setItems] = useState<DeletableItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [stateFilter, setStateFilter] = useState('');
+  const [cityFilter, setCityFilter] = useState('');
+  const [zipCodeFilter, setZipCodeFilter] = useState('');
   const [activeTab, setActiveTab] = useState('hoas');
   const [deleting, setDeleting] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
     fetchData();
-  }, [activeTab]);
+  }, [activeTab, stateFilter, cityFilter, zipCodeFilter]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -389,10 +392,31 @@ export const DeletionManagement: React.FC = () => {
     return iconMap[type] || FileText;
   };
 
-  const filteredItems = items.filter(item =>
-    item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (item.details?.hoa && item.details.hoa.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  const filteredItems = items.filter(item => {
+    const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (item.details?.hoa && item.details.hoa.toLowerCase().includes(searchTerm.toLowerCase()));
+    
+    let matchesLocation = true;
+    
+    // Apply location filters for HOAs and items with location data
+    if (stateFilter || cityFilter || zipCodeFilter) {
+      if (item.type === 'HOA' && item.details?.location) {
+        const location = item.details.location.toLowerCase();
+        if (stateFilter && !location.includes(stateFilter.toLowerCase())) {
+          matchesLocation = false;
+        }
+        if (cityFilter && !location.includes(cityFilter.toLowerCase())) {
+          matchesLocation = false;
+        }
+        // For zip code, we'd need to add zip code data to HOAs
+        if (zipCodeFilter && item.details?.zipCode && !item.details.zipCode.includes(zipCodeFilter)) {
+          matchesLocation = false;
+        }
+      }
+    }
+    
+    return matchesSearch && matchesLocation;
+  });
 
   if (loading) {
     return <div className="text-center py-8">Loading deletion management...</div>;
@@ -464,14 +488,52 @@ export const DeletionManagement: React.FC = () => {
         </Card>
       </div>
 
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-        <Input
-          placeholder="Search content to delete..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-10"
-        />
+      <div className="space-y-4">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+          <Input
+            placeholder="Search content to delete..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+
+        {/* Location Filters */}
+        <div className="flex flex-col md:flex-row gap-4">
+          <Input
+            placeholder="Filter by state..."
+            value={stateFilter}
+            onChange={(e) => setStateFilter(e.target.value)}
+            className="w-full md:w-48"
+          />
+          <Input
+            placeholder="Filter by city..."
+            value={cityFilter}
+            onChange={(e) => setCityFilter(e.target.value)}
+            className="w-full md:w-48"
+          />
+          <Input
+            placeholder="Filter by zip code..."
+            value={zipCodeFilter}
+            onChange={(e) => setZipCodeFilter(e.target.value)}
+            className="w-full md:w-48"
+          />
+          {(stateFilter || cityFilter || zipCodeFilter || searchTerm) && (
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setSearchTerm('');
+                setStateFilter('');
+                setCityFilter('');
+                setZipCodeFilter('');
+              }}
+              className="w-auto"
+            >
+              Clear Filters
+            </Button>
+          )}
+        </div>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
