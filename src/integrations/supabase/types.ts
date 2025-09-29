@@ -257,6 +257,59 @@ export type Database = {
         }
         Relationships: []
       }
+      community_resources: {
+        Row: {
+          category: string | null
+          created_at: string
+          created_by: string
+          description: string | null
+          display_order: number | null
+          hoa_id: string
+          id: string
+          is_public: boolean
+          title: string
+          type: string
+          updated_at: string
+          url: string | null
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          created_by: string
+          description?: string | null
+          display_order?: number | null
+          hoa_id: string
+          id?: string
+          is_public?: boolean
+          title: string
+          type?: string
+          updated_at?: string
+          url?: string | null
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          display_order?: number | null
+          hoa_id?: string
+          id?: string
+          is_public?: boolean
+          title?: string
+          type?: string
+          updated_at?: string
+          url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_resources_hoa_id_fkey"
+            columns: ["hoa_id"]
+            isOneToOne: false
+            referencedRelation: "hoas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contact_messages: {
         Row: {
           created_at: string | null
