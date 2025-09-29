@@ -986,6 +986,10 @@ export type Database = {
           total_posts: number
         }[]
       }
+      is_approved_member: {
+        Args: { hoa_id: string; user_id: string }
+        Returns: boolean
+      }
       is_hoa_admin: {
         Args: { hoa_id: string; user_id: string }
         Returns: boolean
