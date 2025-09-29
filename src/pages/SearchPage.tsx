@@ -35,11 +35,11 @@ export const SearchPage: React.FC = () => {
   const [hoas, setHoas] = useState<HOA[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
-  const [selectedState, setSelectedState] = useState(searchParams.get('state') || '');
+  const [selectedState, setSelectedState] = useState(searchParams.get('state') || 'all');
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>(
     searchParams.get('amenities')?.split(',').filter(Boolean) || []
   );
-  const [minRating, setMinRating] = useState(searchParams.get('rating') || '');
+  const [minRating, setMinRating] = useState(searchParams.get('rating') || 'any');
   const { toast } = useToast();
 
   useEffect(() => {
@@ -78,7 +78,7 @@ export const SearchPage: React.FC = () => {
       }
 
       // State filter
-      if (selectedState) {
+      if (selectedState && selectedState !== 'all') {
         query = query.eq('state', selectedState);
       }
 
@@ -112,9 +112,9 @@ export const SearchPage: React.FC = () => {
   const updateSearchParams = () => {
     const params = new URLSearchParams();
     if (searchQuery) params.set('q', searchQuery);
-    if (selectedState) params.set('state', selectedState);
+    if (selectedState && selectedState !== 'all') params.set('state', selectedState);
     if (selectedAmenities.length > 0) params.set('amenities', selectedAmenities.join(','));
-    if (minRating) params.set('rating', minRating);
+    if (minRating && minRating !== 'any') params.set('rating', minRating);
     setSearchParams(params);
   };
 
@@ -128,9 +128,9 @@ export const SearchPage: React.FC = () => {
 
   const clearFilters = () => {
     setSearchQuery('');
-    setSelectedState('');
+    setSelectedState('all');
     setSelectedAmenities([]);
-    setMinRating('');
+    setMinRating('any');
     setSearchParams(new URLSearchParams());
     searchHOAs();
   };
@@ -166,7 +166,7 @@ export const SearchPage: React.FC = () => {
                   <SelectValue placeholder="Select state" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All states</SelectItem>
+                  <SelectItem value="all">All states</SelectItem>
                   {STATES.map(state => (
                     <SelectItem key={state} value={state}>{state}</SelectItem>
                   ))}
@@ -178,14 +178,14 @@ export const SearchPage: React.FC = () => {
                   <SelectValue placeholder="Minimum rating" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Any rating</SelectItem>
+                  <SelectItem value="any">Any rating</SelectItem>
                   <SelectItem value="4">4+ stars</SelectItem>
                   <SelectItem value="3">3+ stars</SelectItem>
                   <SelectItem value="2">2+ stars</SelectItem>
                 </SelectContent>
               </Select>
               
-              {(selectedState || selectedAmenities.length > 0 || minRating) && (
+              {(selectedState && selectedState !== 'all' || selectedAmenities.length > 0 || minRating && minRating !== 'any') && (
                 <Button variant="outline" onClick={clearFilters}>
                   <X className="h-4 w-4 mr-2" />
                   Clear filters
