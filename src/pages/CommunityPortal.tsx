@@ -792,7 +792,7 @@ export const CommunityPortal: React.FC = () => {
             <div className="space-y-6">
               <div className="flex justify-between items-center">
                 <h2 className="text-2xl font-semibold">Community Events</h2>
-                {isAdminOrPresident && (
+                {isAdminOrPresident && !showEventForm && (
                   <Button onClick={() => setShowEventForm(true)}>
                     <Plus className="h-4 w-4 mr-2" />
                     Create Event
@@ -863,7 +863,7 @@ export const CommunityPortal: React.FC = () => {
             <div className="space-y-6">
               <div className="flex justify-between items-center">
                 <h2 className="text-2xl font-semibold">Community Resources</h2>
-                {isAdminOrPresident && (
+                {isAdminOrPresident && !showResourceForm && (
                   <Button onClick={() => setShowResourceForm(true)}>
                     <Plus className="h-4 w-4 mr-2" />
                     Add Resource
