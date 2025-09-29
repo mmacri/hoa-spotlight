@@ -116,6 +116,7 @@ export const CommunityPortal: React.FC = () => {
   const [showEventForm, setShowEventForm] = useState(false);
   const [showResourceForm, setShowResourceForm] = useState(false);
   const [newPost, setNewPost] = useState({ title: '', content: '', visibility: 'PRIVATE' as 'PRIVATE' | 'PUBLIC' });
+  const [activeTab, setActiveTab] = useState('overview');
 
   useEffect(() => {
     if (slug && user) {
@@ -318,7 +319,7 @@ export const CommunityPortal: React.FC = () => {
           )}
         </div>
 
-        <Tabs defaultValue="overview" className="w-full">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="forum">Forum</TabsTrigger>
@@ -399,16 +400,16 @@ export const CommunityPortal: React.FC = () => {
                       variant="outline" 
                       size="sm" 
                       className="w-full justify-start"
-                      onClick={() => setShowNewPost(true)}
+                      onClick={() => { setActiveTab('forum'); setShowNewPost(true); }}
                     >
                       <MessageSquare className="h-4 w-4 mr-2" />
                       New Post
                     </Button>
-                    <Button variant="outline" size="sm" className="w-full justify-start">
+                    <Button variant="outline" size="sm" className="w-full justify-start" onClick={() => setActiveTab('events')}>
                       <Calendar className="h-4 w-4 mr-2" />
                       View Events
                     </Button>
-                    <Button variant="outline" size="sm" className="w-full justify-start">
+                    <Button variant="outline" size="sm" className="w-full justify-start" onClick={() => setActiveTab('documents')}>
                       <FileText className="h-4 w-4 mr-2" />
                       Browse Documents
                     </Button>
@@ -421,7 +422,7 @@ export const CommunityPortal: React.FC = () => {
             <div className="mt-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold">Latest Forum Posts</h3>
-                <Button variant="ghost" size="sm">View All</Button>
+                <Button variant="ghost" size="sm" onClick={() => setActiveTab('forum')}>View All</Button>
               </div>
               <div className="grid gap-4 md:grid-cols-2">
                 {posts.slice(0, 4).map((post) => (
