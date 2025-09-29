@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -20,10 +21,16 @@ import {
   Upload,
   Download,
   Shield,
-  Crown,
   User,
   Clock,
-  MapPin
+  MapPin,
+  Star,
+  ThumbsUp,
+  ThumbsDown,
+  Globe,
+  Lock,
+  ExternalLink,
+  BookOpen
 } from 'lucide-react';
 
 interface HOADetails {
@@ -60,6 +67,27 @@ interface Post {
   author_user_id: string;
   created_at: string;
   is_pinned: boolean;
+  visibility: 'PRIVATE' | 'PUBLIC';
+}
+
+interface Review {
+  id: string;
+  user_id: string;
+  hoa_id: string;
+  stars: number;
+  title?: string;
+  content?: string;
+  is_anonymous: boolean;
+  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  created_at: string;
+}
+
+interface AdminResponse {
+  id: string;
+  review_id: string;
+  responder_user_id: string;
+  content: string;
+  created_at: string;
 }
 
 interface Membership {
@@ -77,9 +105,11 @@ export const CommunityPortal: React.FC = () => {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
   const [posts, setPosts] = useState<Post[]>([]);
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [adminResponses, setAdminResponses] = useState<AdminResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [showNewPost, setShowNewPost] = useState(false);
-  const [newPost, setNewPost] = useState({ title: '', content: '' });
+  const [newPost, setNewPost] = useState({ title: '', content: '', visibility: 'PRIVATE' as 'PRIVATE' | 'PUBLIC' });
 
   useEffect(() => {
     if (slug && user) {
@@ -114,7 +144,7 @@ export const CommunityPortal: React.FC = () => {
       setMembership(membershipData);
 
       // Fetch community data
-      const [documentsRes, eventsRes, postsRes] = await Promise.all([
+      const [documentsRes, eventsRes, postsRes, reviewsRes] = await Promise.all([
         supabase
           .from('documents')
           .select('*')
@@ -135,12 +165,31 @@ export const CommunityPortal: React.FC = () => {
           .eq('visibility', 'PRIVATE')
           .eq('status', 'APPROVED')
           .order('is_pinned', { ascending: false })
+          .order('created_at', { ascending: false }),
+
+        supabase
+          .from('reviews')
+          .select('*')
+          .eq('hoa_id', hoaData.id)
+          .eq('status', 'APPROVED')
           .order('created_at', { ascending: false })
+          .limit(10)
       ]);
 
       setDocuments(documentsRes.data || []);
       setEvents(eventsRes.data || []);
       setPosts(postsRes.data || []);
+      setReviews(reviewsRes.data || []);
+
+      // Fetch admin responses for reviews
+      if (reviewsRes.data && reviewsRes.data.length > 0) {
+        const { data: responsesData } = await supabase
+          .from('admin_responses')
+          .select('*')
+          .in('review_id', reviewsRes.data.map(r => r.id));
+        
+        setAdminResponses(responsesData || []);
+      }
 
     } catch (error: any) {
       toast({
@@ -164,7 +213,7 @@ export const CommunityPortal: React.FC = () => {
           author_user_id: user.id,
           title: newPost.title,
           content: newPost.content,
-          visibility: 'PRIVATE'
+          visibility: newPost.visibility
         });
 
       if (error) throw error;
@@ -174,7 +223,7 @@ export const CommunityPortal: React.FC = () => {
         description: "Your post has been submitted for approval"
       });
 
-      setNewPost({ title: '', content: '' });
+      setNewPost({ title: '', content: '', visibility: 'PRIVATE' });
       setShowNewPost(false);
       fetchCommunityData();
 
@@ -222,35 +271,156 @@ export const CommunityPortal: React.FC = () => {
     );
   }
 
+  const avgRating = reviews.length > 0 ? reviews.reduce((acc, r) => acc + r.stars, 0) / reviews.length : 0;
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
       
       <div className="container mx-auto px-4 py-8">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-3xl font-bold mb-2">{hoa?.name} Community Portal</h1>
-              <p className="text-muted-foreground">
-                Welcome to your private community space
-              </p>
-            </div>
-            {(membership.role === 'ADMIN' || membership.role === 'PRESIDENT') && (
-              <Link to={`/community/${slug}/dashboard`}>
-                <Button>
-                  <Shield className="h-4 w-4 mr-2" />
-                  Community Dashboard
-                </Button>
-              </Link>
-            )}
+        <div className="flex justify-between items-center mb-6">
+          <div>
+            <h1 className="text-3xl font-bold mb-2">{hoa?.name} Community Portal</h1>
+            <p className="text-muted-foreground">
+              Welcome to your private community space
+            </p>
           </div>
+          {(membership.role === 'ADMIN' || membership.role === 'PRESIDENT') && (
+            <Link to={`/community/${slug}/dashboard`}>
+              <Button>
+                <Shield className="h-4 w-4 mr-2" />
+                Community Dashboard
+              </Button>
+            </Link>
+          )}
+        </div>
 
-        <Tabs defaultValue="forum" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+        <Tabs defaultValue="overview" className="w-full">
+          <TabsList className="grid w-full grid-cols-6">
+            <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="forum">Forum</TabsTrigger>
+            <TabsTrigger value="reviews">Reviews</TabsTrigger>
             <TabsTrigger value="documents">Documents</TabsTrigger>
             <TabsTrigger value="events">Events</TabsTrigger>
-            <TabsTrigger value="info">Community Info</TabsTrigger>
+            <TabsTrigger value="resources">Resources</TabsTrigger>
           </TabsList>
+          
+          <TabsContent value="overview" className="mt-6">
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {/* Community Stats */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Star className="h-5 w-5 text-yellow-500" />
+                    Community Rating
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <div className="flex">
+                        {Array.from({ length: 5 }, (_, i) => (
+                          <Star
+                            key={i}
+                            className={`h-4 w-4 ${
+                              i < Math.round(avgRating) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'
+                            }`}
+                          />
+                        ))}
+                      </div>
+                      <span className="text-sm text-muted-foreground">
+                        ({reviews.length} reviews)
+                      </span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Based on community feedback
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Recent Activity */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <MessageSquare className="h-5 w-5 text-blue-500" />
+                    Recent Activity
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    <div className="text-sm">
+                      <span className="font-medium">{posts.length}</span> forum posts
+                    </div>
+                    <div className="text-sm">
+                      <span className="font-medium">{events.length}</span> upcoming events
+                    </div>
+                    <div className="text-sm">
+                      <span className="font-medium">{documents.length}</span> documents
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Quick Actions */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Plus className="h-5 w-5 text-green-500" />
+                    Quick Actions
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="w-full justify-start"
+                      onClick={() => setShowNewPost(true)}
+                    >
+                      <MessageSquare className="h-4 w-4 mr-2" />
+                      New Post
+                    </Button>
+                    <Button variant="outline" size="sm" className="w-full justify-start">
+                      <Calendar className="h-4 w-4 mr-2" />
+                      View Events
+                    </Button>
+                    <Button variant="outline" size="sm" className="w-full justify-start">
+                      <FileText className="h-4 w-4 mr-2" />
+                      Browse Documents
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Latest Posts Preview */}
+            <div className="mt-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold">Latest Forum Posts</h3>
+                <Button variant="ghost" size="sm">View All</Button>
+              </div>
+              <div className="grid gap-4 md:grid-cols-2">
+                {posts.slice(0, 4).map((post) => (
+                  <Card key={post.id} className="hover:shadow-md transition-shadow">
+                    <CardContent className="p-4">
+                      <div className="flex items-start justify-between mb-2">
+                        <h4 className="font-medium text-sm truncate flex-1">{post.title}</h4>
+                        {post.is_pinned && <Badge variant="secondary" className="ml-2">Pinned</Badge>}
+                      </div>
+                      <p className="text-xs text-muted-foreground line-clamp-2 mb-2">
+                        {post.content}
+                      </p>
+                      <div className="flex items-center text-xs text-muted-foreground">
+                        <Clock className="h-3 w-3 mr-1" />
+                        {new Date(post.created_at).toLocaleDateString()}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          </TabsContent>
           
           <TabsContent value="forum" className="mt-6">
             <div className="space-y-6">
@@ -287,6 +457,33 @@ export const CommunityPortal: React.FC = () => {
                         rows={4}
                       />
                     </div>
+                    <div>
+                      <Label htmlFor="visibility">Visibility</Label>
+                      <div className="flex gap-4 mt-2">
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="radio"
+                            name="visibility"
+                            checked={newPost.visibility === 'PRIVATE'}
+                            onChange={() => setNewPost(prev => ({ ...prev, visibility: 'PRIVATE' }))}
+                            className="text-primary"
+                          />
+                          <Lock className="h-4 w-4" />
+                          <span className="text-sm">Private Community</span>
+                        </label>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="radio"
+                            name="visibility"
+                            checked={newPost.visibility === 'PUBLIC'}
+                            onChange={() => setNewPost(prev => ({ ...prev, visibility: 'PUBLIC' }))}
+                            className="text-primary"
+                          />
+                          <Globe className="h-4 w-4" />
+                          <span className="text-sm">Public Feed</span>
+                        </label>
+                      </div>
+                    </div>
                     <div className="flex space-x-2">
                       <Button onClick={createPost}>Post</Button>
                       <Button variant="outline" onClick={() => setShowNewPost(false)}>
@@ -307,6 +504,18 @@ export const CommunityPortal: React.FC = () => {
                             {post.title}
                             {post.is_pinned && (
                               <Badge variant="secondary">Pinned</Badge>
+                            )}
+                            {post.visibility === 'PUBLIC' && (
+                              <Badge variant="outline" className="gap-1">
+                                <Globe className="h-3 w-3" />
+                                Public
+                              </Badge>
+                            )}
+                            {post.visibility === 'PRIVATE' && (
+                              <Badge variant="outline" className="gap-1">
+                                <Lock className="h-3 w-3" />
+                                Private
+                              </Badge>
                             )}
                           </CardTitle>
                           <div className="flex items-center text-sm text-muted-foreground mt-1">
@@ -334,6 +543,124 @@ export const CommunityPortal: React.FC = () => {
                     <Button onClick={() => setShowNewPost(true)}>
                       Create First Post
                     </Button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="reviews" className="mt-6">
+            <div className="space-y-6">
+              <div className="flex justify-between items-center">
+                <h2 className="text-2xl font-semibold">Community Reviews</h2>
+                <div className="flex gap-2">
+                  <Badge variant="outline" className="gap-1">
+                    <ThumbsUp className="h-3 w-3" />
+                    {reviews.filter(r => r.stars >= 4).length} Positive
+                  </Badge>
+                  <Badge variant="outline" className="gap-1">
+                    <ThumbsDown className="h-3 w-3" />
+                    {reviews.filter(r => r.stars <= 2).length} Negative
+                  </Badge>
+                </div>
+              </div>
+
+              {/* Reviews Summary */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Community Satisfaction</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-center">
+                    {[5, 4, 3, 2, 1].map(stars => (
+                      <div key={stars} className="space-y-1">
+                        <div className="flex justify-center">
+                          {Array.from({ length: stars }, (_, i) => (
+                            <Star key={i} className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                          ))}
+                        </div>
+                        <div className="text-sm font-medium">
+                          {reviews.filter(r => r.stars === stars).length}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          {stars} star{stars !== 1 ? 's' : ''}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Recent Reviews */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">Recent Reviews</h3>
+                {reviews.map((review) => {
+                  const response = adminResponses.find(r => r.review_id === review.id);
+                  return (
+                    <Card key={review.id}>
+                      <CardHeader className="pb-3">
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-center space-x-3">
+                            <div className="w-10 h-10 bg-muted rounded-full flex items-center justify-center">
+                              <User className="h-5 w-5" />
+                            </div>
+                            <div>
+                              <p className="font-medium">
+                                {review.is_anonymous ? 'Anonymous' : 'HOA Member'}
+                              </p>
+                              <div className="flex items-center space-x-2">
+                                <div className="flex">
+                                  {Array.from({ length: 5 }, (_, i) => (
+                                    <Star
+                                      key={i}
+                                      className={`h-4 w-4 ${
+                                        i < review.stars ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'
+                                      }`}
+                                    />
+                                  ))}
+                                </div>
+                                <span className="text-sm text-muted-foreground">
+                                  {new Date(review.created_at).toLocaleDateString()}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                          <Badge variant={review.stars >= 4 ? "default" : review.stars <= 2 ? "destructive" : "secondary"}>
+                            {review.stars >= 4 ? "Positive" : review.stars <= 2 ? "Negative" : "Neutral"}
+                          </Badge>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        {review.title && (
+                          <h4 className="font-semibold mb-2">{review.title}</h4>
+                        )}
+                        {review.content && (
+                          <p className="text-muted-foreground mb-4">{review.content}</p>
+                        )}
+                        {response && (
+                          <div className="mt-4 p-4 bg-muted/50 rounded-lg border-l-4 border-primary">
+                            <div className="flex items-center space-x-2 mb-2">
+                              <MessageSquare className="h-4 w-4 text-primary" />
+                              <span className="font-medium text-sm">HOA Response</span>
+                              <span className="text-xs text-muted-foreground">
+                                {new Date(response.created_at).toLocaleDateString()}
+                              </span>
+                            </div>
+                            <p className="text-sm">{response.content}</p>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+                
+                {reviews.length === 0 && (
+                  <div className="text-center py-12">
+                    <Star className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold mb-2">No reviews yet</h3>
+                    <p className="text-muted-foreground">
+                      Community reviews will appear here when submitted
+                    </p>
                   </div>
                 )}
               </div>
@@ -455,31 +782,141 @@ export const CommunityPortal: React.FC = () => {
               </div>
             </div>
           </TabsContent>
-          
-          <TabsContent value="info" className="mt-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Community Information</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div>
-                    <h4 className="font-semibold mb-2">Your Membership</h4>
-                    <div className="flex items-center space-x-2">
-                      <Badge variant="outline">{membership.role}</Badge>
-                      <Badge variant="secondary">{membership.status}</Badge>
+
+          <TabsContent value="resources" className="mt-6">
+            <div className="space-y-6">
+              <div className="flex justify-between items-center">
+                <h2 className="text-2xl font-semibold">Community Resources</h2>
+                {(membership.role === 'ADMIN' || membership.role === 'PRESIDENT') && (
+                  <Button>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Resource
+                  </Button>
+                )}
+              </div>
+
+              {/* Resource Categories */}
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <ExternalLink className="h-5 w-5 text-blue-500" />
+                      Important Links
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="space-y-2">
+                      <Button variant="outline" className="w-full justify-start" size="sm">
+                        <ExternalLink className="h-4 w-4 mr-2" />
+                        HOA Management Portal
+                      </Button>
+                      <Button variant="outline" className="w-full justify-start" size="sm">
+                        <ExternalLink className="h-4 w-4 mr-2" />
+                        Maintenance Requests
+                      </Button>
+                      <Button variant="outline" className="w-full justify-start" size="sm">
+                        <ExternalLink className="h-4 w-4 mr-2" />
+                        Payment Portal
+                      </Button>
                     </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <FileText className="h-5 w-5 text-green-500" />
+                      Forms & Documents
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="space-y-2">
+                      <Button variant="outline" className="w-full justify-start" size="sm">
+                        <Download className="h-4 w-4 mr-2" />
+                        Architectural Request Form
+                      </Button>
+                      <Button variant="outline" className="w-full justify-start" size="sm">
+                        <Download className="h-4 w-4 mr-2" />
+                        HOA Bylaws
+                      </Button>
+                      <Button variant="outline" className="w-full justify-start" size="sm">
+                        <Download className="h-4 w-4 mr-2" />
+                        Community Guidelines
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Users className="h-5 w-5 text-purple-500" />
+                      Contact Information
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="space-y-2 text-sm">
+                      <div>
+                        <p className="font-medium">Management Office</p>
+                        <p className="text-muted-foreground">Mon-Fri 9AM-5PM</p>
+                        <p className="text-muted-foreground">(555) 123-4567</p>
+                      </div>
+                      <Separator />
+                      <div>
+                        <p className="font-medium">Emergency Maintenance</p>
+                        <p className="text-muted-foreground">24/7 Available</p>
+                        <p className="text-muted-foreground">(555) 987-6543</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Community Guidelines */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <BookOpen className="h-5 w-5 text-orange-500" />
+                    Community Guidelines
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="prose prose-sm max-w-none">
+                    <ul className="space-y-2">
+                      <li>Respect your neighbors and maintain community standards</li>
+                      <li>Follow architectural guidelines for any modifications</li>
+                      <li>Keep common areas clean and accessible</li>
+                      <li>Report maintenance issues promptly through proper channels</li>
+                      <li>Participate in community meetings and votes when possible</li>
+                    </ul>
                   </div>
-                  
-                  {hoa?.description_private && (
-                    <div>
-                      <h4 className="font-semibold mb-2">Private Community Description</h4>
-                      <p className="text-muted-foreground">{hoa.description_private}</p>
+                </CardContent>
+              </Card>
+
+              {hoa?.description_private && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Community Information</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div>
+                        <h4 className="font-semibold mb-2">Your Membership</h4>
+                        <div className="flex items-center space-x-2">
+                          <Badge variant="outline">{membership.role}</Badge>
+                          <Badge variant="secondary">{membership.status}</Badge>
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <h4 className="font-semibold mb-2">Private Community Description</h4>
+                        <p className="text-muted-foreground">{hoa.description_private}</p>
+                      </div>
                     </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
           </TabsContent>
         </Tabs>
       </div>
