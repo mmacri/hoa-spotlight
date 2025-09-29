@@ -96,9 +96,17 @@ export const CommunityFeed: React.FC<CommunityFeedProps> = ({
 
       if (error) throw error;
       
+      // Fetch author profiles separately
+      const authorIds = [...new Set((data || []).map(post => post.author_user_id))];
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('id, username, full_name')
+        .in('id', authorIds);
+
       const postsWithAuthor = (data || []).map(post => ({
         ...post,
-        author: { username: 'Unknown User', full_name: 'Unknown User' }
+        author: profiles?.find(p => p.id === post.author_user_id) || 
+                { username: 'Unknown User', full_name: 'Unknown User' }
       }));
       
       setPosts(postsWithAuthor);
@@ -124,9 +132,17 @@ export const CommunityFeed: React.FC<CommunityFeedProps> = ({
 
       if (error) throw error;
       
+      // Fetch author profiles separately
+      const authorIds = [...new Set((data || []).map(comment => comment.author_user_id))];
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('id, username, full_name')
+        .in('id', authorIds);
+
       const commentsWithAuthor = (data || []).map(comment => ({
         ...comment,
-        author: { username: 'Unknown User', full_name: 'Unknown User' }
+        author: profiles?.find(p => p.id === comment.author_user_id) || 
+                { username: 'Unknown User', full_name: 'Unknown User' }
       }));
       
       setComments(prev => ({ ...prev, [postId]: commentsWithAuthor }));
