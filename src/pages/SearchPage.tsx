@@ -46,19 +46,31 @@ export const SearchPage: React.FC = () => {
     searchHOAs();
   }, []);
 
+  // Auto-search when search query changes
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (searchQuery) {
+        searchHOAs();
+        updateSearchParams();
+      }
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery]);
+
+  // Auto-search when filters change
+  useEffect(() => {
+    searchHOAs();
+    updateSearchParams();
+  }, [selectedState, selectedAmenities, minRating]);
+
   const searchHOAs = async () => {
     setLoading(true);
     
     try {
       let query = supabase
         .from('hoas')
-        .select(`
-          *,
-          rating_aggregates (
-            average_rating,
-            total_reviews
-          )
-        `);
+        .select('*');
 
       // Text search
       if (searchQuery.trim()) {
@@ -75,23 +87,11 @@ export const SearchPage: React.FC = () => {
         query = query.overlaps('amenities', selectedAmenities);
       }
 
-      // Rating filter
-      if (minRating) {
-        query = query.gte('rating_aggregates.average_rating', parseFloat(minRating));
-      }
-
       const { data, error } = await query;
 
       if (error) throw error;
 
-      // Flatten the rating data
-      const hoasWithRatings = (data || []).map(hoa => ({
-        ...hoa,
-        average_rating: hoa.rating_aggregates?.[0]?.average_rating || null,
-        total_reviews: hoa.rating_aggregates?.[0]?.total_reviews || 0
-      }));
-
-      setHoas(hoasWithRatings);
+      setHoas(data || []);
     } catch (error: any) {
       toast({
         title: "Search failed",
@@ -166,6 +166,7 @@ export const SearchPage: React.FC = () => {
                   <SelectValue placeholder="Select state" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="">All states</SelectItem>
                   {STATES.map(state => (
                     <SelectItem key={state} value={state}>{state}</SelectItem>
                   ))}
@@ -177,6 +178,7 @@ export const SearchPage: React.FC = () => {
                   <SelectValue placeholder="Minimum rating" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="">Any rating</SelectItem>
                   <SelectItem value="4">4+ stars</SelectItem>
                   <SelectItem value="3">3+ stars</SelectItem>
                   <SelectItem value="2">2+ stars</SelectItem>
