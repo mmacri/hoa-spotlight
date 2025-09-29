@@ -1,8 +1,20 @@
-# Welcome to your Lovable project
+# HOAdoor - HOA Community Platform
+
+A comprehensive platform for HOA communities to connect, communicate, and manage their community affairs.
+
+## Features
+
+- **Public HOA Directory**: Browse and search for HOA communities
+- **Community Reviews**: Authentic reviews from residents
+- **Private Community Portals**: Secure spaces for HOA members
+- **Event Management**: Community calendar and event organization
+- **Document Management**: Secure document sharing
+- **Admin Dashboard**: Comprehensive management tools
+- **User Authentication**: Secure login and member verification
 
 ## Project info
 
-**URL**: https://lovable.dev/projects/c2dec172-8ff5-4fd1-a0c2-e5ddea77cd61
+**Lovable URL**: https://lovable.dev/projects/c2dec172-8ff5-4fd1-a0c2-e5ddea77cd61
 
 ## How can I edit this code?
 
@@ -54,15 +66,34 @@ npm run dev
 
 This project is built with:
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+- **Frontend**: React 18, TypeScript, Tailwind CSS
+- **UI Components**: Radix UI with shadcn/ui
+- **Backend**: Supabase (Database, Auth, Storage)
+- **Routing**: React Router v6
+- **Build Tool**: Vite
+- **Deployment**: GitHub Pages
 
 ## How can I deploy this project?
 
+### Using Lovable (Recommended)
+
 Simply open [Lovable](https://lovable.dev/projects/c2dec172-8ff5-4fd1-a0c2-e5ddea77cd61) and click on Share -> Publish.
+
+### GitHub Pages (Automatic)
+
+This project is configured for automatic deployment to GitHub Pages:
+
+1. Push to the `main` branch
+2. GitHub Actions will automatically build and deploy
+3. The site will be available at `https://yourusername.github.io/repository-name/`
+
+### Building for Production
+
+```bash
+npm run build
+```
+
+The built files will be in the `dist` directory and can be deployed to any static hosting service.
 
 ## Can I connect a custom domain to my Lovable project?
 

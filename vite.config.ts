@@ -15,4 +15,10 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  // GitHub Pages configuration
+  base: process.env.NODE_ENV === 'production' ? process.env.GITHUB_REPOSITORY ? `/${process.env.GITHUB_REPOSITORY.split('/')[1]}/` : '/' : '/',
+  build: {
+    outDir: 'dist',
+    assetsDir: 'assets',
+  },
 }));
