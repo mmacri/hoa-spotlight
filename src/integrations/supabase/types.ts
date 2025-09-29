@@ -1083,7 +1083,7 @@ export type Database = {
       flag_target: "REVIEW" | "POST" | "COMMENT"
       membership_role: "MEMBER" | "ADMIN" | "PRESIDENT"
       membership_status: "PENDING" | "APPROVED" | "REJECTED"
-      visibility_type: "PRIVATE" | "PUBLIC"
+      visibility_type: "PRIVATE" | "PUBLIC" | "BOTH"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1216,7 +1216,7 @@ export const Constants = {
       flag_target: ["REVIEW", "POST", "COMMENT"],
       membership_role: ["MEMBER", "ADMIN", "PRESIDENT"],
       membership_status: ["PENDING", "APPROVED", "REJECTED"],
-      visibility_type: ["PRIVATE", "PUBLIC"],
+      visibility_type: ["PRIVATE", "PUBLIC", "BOTH"],
     },
   },
 } as const

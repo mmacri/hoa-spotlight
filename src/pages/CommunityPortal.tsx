@@ -61,6 +61,7 @@ interface Event {
   starts_at: string;
   ends_at: string;
   created_at: string;
+  visibility: 'PUBLIC' | 'PRIVATE' | 'BOTH';
 }
 
 interface Post {
@@ -70,7 +71,7 @@ interface Post {
   author_user_id: string;
   created_at: string;
   is_pinned: boolean;
-  visibility: 'PRIVATE' | 'PUBLIC';
+  visibility: 'PRIVATE' | 'PUBLIC' | 'BOTH';
 }
 
 interface Review {
@@ -115,7 +116,7 @@ export const CommunityPortal: React.FC = () => {
   const [showDocumentForm, setShowDocumentForm] = useState(false);
   const [showEventForm, setShowEventForm] = useState(false);
   const [showResourceForm, setShowResourceForm] = useState(false);
-  const [newPost, setNewPost] = useState({ title: '', content: '', visibility: 'PRIVATE' as 'PRIVATE' | 'PUBLIC' });
+  const [newPost, setNewPost] = useState({ title: '', content: '', visibility: 'PRIVATE' as 'PRIVATE' | 'PUBLIC' | 'BOTH' });
   const [activeTab, setActiveTab] = useState('overview');
 
   useEffect(() => {
@@ -169,7 +170,7 @@ export const CommunityPortal: React.FC = () => {
           .from('posts')
           .select('*')
           .eq('hoa_id', hoaData.id)
-          .eq('visibility', 'PRIVATE')
+          .in('visibility', ['PRIVATE', 'BOTH'])
           .eq('status', 'APPROVED')
           .order('is_pinned', { ascending: false })
           .order('created_at', { ascending: false }),
@@ -541,6 +542,18 @@ export const CommunityPortal: React.FC = () => {
                           />
                           <Globe className="h-4 w-4" />
                           <span className="text-sm">Public Feed</span>
+                        </label>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="radio"
+                            name="visibility"
+                            checked={newPost.visibility === 'BOTH'}
+                            onChange={() => setNewPost(prev => ({ ...prev, visibility: 'BOTH' }))}
+                            className="text-primary"
+                          />
+                          <Globe className="h-4 w-4" />
+                          <Lock className="h-4 w-4" />
+                          <span className="text-sm">Both Public & Private</span>
                         </label>
                       </div>
                     </div>

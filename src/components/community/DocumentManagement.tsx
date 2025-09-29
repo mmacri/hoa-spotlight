@@ -28,7 +28,7 @@ export const DocumentManagement: React.FC<DocumentManagementProps> = ({
     description: '',
     file_url: '',
     file_type: 'LINK',
-    visibility: 'PRIVATE' as 'PUBLIC' | 'PRIVATE'
+    visibility: 'PRIVATE' as 'PUBLIC' | 'PRIVATE' | 'BOTH'
   });
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);

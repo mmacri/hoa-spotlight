@@ -19,7 +19,7 @@ interface Post {
   author_user_id: string;
   title: string;
   content: string;
-  visibility: 'PUBLIC' | 'PRIVATE';
+  visibility: 'PUBLIC' | 'PRIVATE' | 'BOTH';
   status: 'PENDING' | 'APPROVED' | 'REJECTED';
   is_pinned: boolean;
   created_at: string;
@@ -74,7 +74,7 @@ export const CommunityFeed: React.FC<CommunityFeedProps> = ({
   const [postFormData, setPostFormData] = useState({
     title: '',
     content: '',
-    visibility: 'PRIVATE' as 'PUBLIC' | 'PRIVATE'
+    visibility: 'PRIVATE' as 'PUBLIC' | 'PRIVATE' | 'BOTH'
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   

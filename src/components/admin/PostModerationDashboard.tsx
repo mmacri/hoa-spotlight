@@ -26,7 +26,7 @@ interface Post {
   id: string;
   title: string;
   content: string;
-  visibility: 'PUBLIC' | 'PRIVATE';
+  visibility: 'PUBLIC' | 'PRIVATE' | 'BOTH';
   status: 'PENDING' | 'APPROVED' | 'REJECTED';
   created_at: string;
   author_user_id: string;
@@ -58,7 +58,7 @@ export const PostModerationDashboard: React.FC<PostModerationDashboardProps> = (
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'PENDING' | 'APPROVED' | 'REJECTED'>('PENDING');
-  const [visibilityFilter, setVisibilityFilter] = useState<'all' | 'PUBLIC' | 'PRIVATE'>('all');
+  const [visibilityFilter, setVisibilityFilter] = useState<'all' | 'PUBLIC' | 'PRIVATE' | 'BOTH'>('all');
   const [moderationReason, setModerationReason] = useState<Record<string, string>>({});
   const [activePostId, setActivePostId] = useState<string | null>(null);
 
@@ -275,6 +275,7 @@ export const PostModerationDashboard: React.FC<PostModerationDashboardProps> = (
             <SelectItem value="all">All Visibility</SelectItem>
             <SelectItem value="PUBLIC">Public</SelectItem>
             <SelectItem value="PRIVATE">Private</SelectItem>
+            <SelectItem value="BOTH">Both Public & Private</SelectItem>
           </SelectContent>
         </Select>
       </div>

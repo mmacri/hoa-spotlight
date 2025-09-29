@@ -17,7 +17,7 @@ interface Event {
   starts_at: string;
   ends_at: string | null;
   location: string | null;
-  visibility: 'PUBLIC' | 'PRIVATE';
+  visibility: 'PUBLIC' | 'PRIVATE' | 'BOTH';
   created_by: string | null;
   created_at: string;
   hoa_id: string;
@@ -39,7 +39,7 @@ export const EventManagement: React.FC<EventManagementProps> = ({ hoaId, isAdmin
     starts_at: '',
     ends_at: '',
     location: '',
-    visibility: 'PRIVATE' as 'PUBLIC' | 'PRIVATE'
+    visibility: 'PRIVATE' as 'PUBLIC' | 'PRIVATE' | 'BOTH'
   });
   
   const { toast } = useToast();
